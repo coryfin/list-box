@@ -31,7 +31,7 @@ A mobile-first list manager where every entry is an "item." Each item consists o
 
 ## 3. Functional Requirements
 
-### 3.1 List & Template Management
+### 3.1 Home Screen (List Index)
 
 - **Home Screen:** A vertical index of all user-created lists.
 - **Create List with Templates:** Users can create a blank list or choose a "Quick-Start" template. This populates the list with example items containing relevant **information** in the description:
@@ -40,17 +40,26 @@ A mobile-first list manager where every entry is an "item." Each item consists o
   - **Goal Tracker:** Populates an example item with "Success Criteria" and "Target Date" info.
 - **Delete List:** A way to remove an entire list and its items (includes a confirmation prompt).
 
-### 3.2 Item Management
+### 3.2 List Detail Screen
 
-- **List Detail Screen:** Displays the list name and a vertical stack of all item titles.
+- **Layout (Medium Top App Bar):** Displays the list name and a vertical stack of all item titles. It implements a **Material 3 Medium Top App Bar** where the List Title is positioned below the leading/trailing icon buttons to allow for **two-line wrapping**. 
+- **Edit List Title:**
+  - **Tap-to-Edit:** The List Title is editable via a **Tap-to-Edit** trigger. Tapping the title transitions it into an active `TextField`.
+  - **Save Action:** While in Edit Mode, a **Save** button becomes visible to commit changes. To maintain one-handed utility, this button is located either as a trailing action in the **Medium Top App Bar** or within a **Toolbar** anchored to the top of the software keyboard.
+  - **Scroll Behavior:** The App Bar uses `exitUntilCollapsed` behavior. When a title is tapped in a collapsed state, the UI must scroll to the top to expand the bar before focusing the input.
 - **Add Item:** A streamlined input for the Item Title and Item Description. The Description input begins as a single row but expands vertically as the user enters more text; the bottom sheet itself expands to accommodate this growing content.
-- **Item Detail View (Full-Screen):** Tapping an item opens a full-screen modal showing the full description. 
 - **Multi-Select & Bulk Delete:**
   - **Trigger:** Long-pressing an item title in the List Detail Screen transitions the UI to a multi-select state.
   - **Selection:** The pressed item is selected; other items can be selected by tapping them.
   - **Action:** A delete action appears in the top app bar to delete all selected items (includes a confirmation prompt).
-  - **Reorder Items:** If a user starts dragging while the initially pressed item is selected (but no other items have been selected yet), the app transitions to a drag state to reorder items.
-- **Delete Item (Single):** The delete action is also located within the **Item Detail View**. Tapping delete triggers a **confirmation prompt**.
+- **Reorder Items:** If a user starts dragging while the initially pressed item is selected (but no other items have been selected yet), the app transitions to a drag state to reorder items.
+
+### 3.3 Item Detail View (Full-Screen)
+
+- **Layout (Full-Screen):** Tapping an item opens a full-screen modal showing the full description. This view uses a **Material 3 Medium Top App Bar** with the Item Title positioned below the leading/trailing icon buttons to allow for **two-line wrapping**. 
+- **Tap-to-Edit:** Tapping the Title or Description field directly transitions that specific field into an active `TextField`.
+- **Save Action:** Similar to the List Detail Screen, an explicit **Save** button appears in Edit Mode (either in the Top App Bar or atop the keyboard) to commit the edit and return to a read-only state.
+- **Delete Item:** The delete action is located within the **Item Detail View**. Tapping delete triggers a **confirmation prompt**.
 
 ---
 

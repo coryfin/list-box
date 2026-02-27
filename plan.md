@@ -7,13 +7,13 @@
 ## 2. Technology Stack
 
 
-| Layer                    | Technology                  | Rationale                                                                                              |
-| ------------------------ | --------------------------- | ------------------------------------------------------------------------------------------------------ |
-| **UI Framework**         | Compose Multiplatform (CMP) | Shared Material 3 UI for Android and iOS.                                                              |
-| **Navigation**           | Navigation 3                | Official state-driven navigation for cross-platform apps.                                              |
-| **Dependency Injection** | kotlin-inject               | Compile-time safe DI for Kotlin Multiplatform.                                                         |
-| **Database**             | SQLDelight                  | Type-safe SQLite persistence with native drivers.                                                      |
-| **Logic/State**          | ViewModel + StateFlow       | Standard UDF with multiplatform-capable ViewModels.Standard UDF with multiplatform-capable ViewModels. |
+| Layer                    | Technology                  | Rationale                                                 |
+| ------------------------ | --------------------------- | --------------------------------------------------------- |
+| **UI Framework**         | Compose Multiplatform (CMP) | Shared Material 3 UI for Android and iOS.                 |
+| **Navigation**           | Navigation 3                | Official state-driven navigation for cross-platform apps. |
+| **Dependency Injection** | kotlin-inject               | Compile-time safe DI for Kotlin Multiplatform.            |
+| **Database**             | SQLDelight                  | Type-safe SQLite persistence with native drivers.         |
+| **Logic/State**          | ViewModel + StateFlow       | Standard UDF with multiplatform-capable ViewModels.       |
 
 
 ---
@@ -66,17 +66,20 @@ To support manual reordering without mass-updating rows, `orderIndex` uses `REAL
 
 ### 4.2 Selection & Drag State Machine
 
-The List Detail screen manages three primary UI states:
+ The List Detail screen manages four primary UI states:
 
-1. **Idle:** Default viewing state.
-2. **Multi-Select:** Triggered by `onLongClick`. Tracks a `Set<UUID>` of selected IDs.
+1. **Idle:** Default viewing state. Includes **Tap-to-Edit** triggers for Title and Description fields.
+2. **Edit Mode:** Triggered by field focus from a tap gesture. Transitions specific `Text` components into active `TextField` components.
+  - *UI Action:* A **Save** button appears (Top App Bar or Keyboard Toolbar) to commit changes and return to **Idle** state.
+3. **Multi-Select:** Triggered by `onLongClick`. Tracks a `Set<UUID>` of selected IDs.
   - *Transition:* If a drag gesture starts while `selectedIds.size == 1`, switch to **Reorder Mode.**
-3. **Reorder Mode:** Drag-and-drop active using the fractional indexing logic.
+4. **Reorder Mode:** Drag-and-drop active using the fractional indexing logic.
 
 ### 4.3 Navigation & Modals
 
 - **"Add Item" View:** Implemented as a **Bottom Half-Sheet Modal**. The description text field is configured for dynamic height, causing the modal to expand vertically as content is added.
 - **"Item Detail" View:** Implemented as a **Full-Screen Modal** for focused reading and long-form editing.
+  - **Component Transition:** The UI within the modal dynamically transitions between `Text` and `TextField` components based on the active **Tap-to-Edit** state triggered by field focus.
 
 ### 4.4 Reactive Repository
 
