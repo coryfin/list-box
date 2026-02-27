@@ -4,7 +4,7 @@
 
 ### The Problem
 
-Spreadsheets (Google Sheets/Excel) are powerful for tabular data but are notoriously difficult to use on a mobile device. Note-taking apps (Keep/Notes) are too unstructured for data like "Gift Ideas," "Recipe Box," or "Personal Goals" where specific details (links, ingredients, milestones) are required. Users need a "spreadsheet UI alternative" that provides structure without the horizontal grid.
+Spreadsheets are powerful for tabular data but are notoriously difficult to use on a mobile device. Note-taking apps are too unstructured for lists like "Gift Ideas," "Recipe Box," or "Personal Goals" where specific details (links, ingredients, milestones) are required. Users need a structured "spreadsheet UI alternative" designed for mobile screens.
 
 ### The Solution
 
@@ -33,41 +33,66 @@ A mobile-first list manager where every entry is an "item." Each item consists o
 
 ### 3.1 Home Screen (List Index)
 
-- **Home Screen:** A vertical index of all user-created lists.
-- **Create List with Templates:** Users can create a blank list or choose a "Quick-Start" template. This populates the list with example items containing relevant **information** in the description:
-  - **Gift Ideas:** Populates an example item with "Store," "Price," and "Recipient" info.
-  - **Recipe Box:** Populates an example item with "Ingredients" and "Instructions" info.
-  - **Goal Tracker:** Populates an example item with "Success Criteria" and "Target Date" info.
-- **Delete List:** A way to remove an entire list and its items (includes a confirmation prompt).
+- **Layout:** Vertical index of lists, sorted by **Creation Date (Descending)**. Reordering is not supported; deletion is handled in the **List Detail Screen**.
+- **Empty State:** Displays a "Blank List" button alongside "Quick-Start" template buttons (Gift Ideas, Recipe Box, Goal Tracker). These templates serve strictly as an onboarding tool to demonstrate the app's capability and structure.
+  - **Create from Template:** Populates a new list with example items where the **Title** and **Description** fields are pre-filled. The **Description** field is pre-filled with plain text labels for relevant information:
+    - **Gift Ideas:** Populates the description with "Store:", "Price:", and "Recipient:" labels.
+    - **Recipe Box:** Populates the description with "Ingredients:" and "Instructions:" labels.
+    - **Goal Tracker:** Populates the description with "Success Criteria:" and "Target Date:" labels.
+- **Populated State:** Contains a FAB that creates "Blank List" when tapped. Template buttons are hidden once the user has created at least one list. If all lists are subsequently deleted, the Home Screen returns to the **Empty State**, and the template buttons reappear to assist the user.
+- **List Selection:** Tapping a list opens the **List Detail Screen**.
+- **List Creation:** Upon choosing "Blank List" (from the empty state or populated state), the user is prompted for a required **List Title** (Max 100 chars, duplicates allowed). Once confirmed, the list is created and the user is navigated directly to the **List Detail Screen**.
 
 ### 3.2 List Detail Screen
 
-- **Layout (Medium Top App Bar):** Displays the list name and a vertical stack of all item titles. It implements a **Material 3 Medium Top App Bar** where the List Title is positioned below the leading/trailing icon buttons to allow for **two-line wrapping**. 
-- **Edit List Title:**
-  - **Tap-to-Edit:** The List Title is editable via a **Tap-to-Edit** trigger. Tapping the title transitions it into an active `TextField`.
-  - **Save Action:** While in Edit Mode, a **Save** button becomes visible to commit changes. To maintain one-handed utility, this button is located either as a trailing action in the **Medium Top App Bar** or within a **Toolbar** anchored to the top of the software keyboard.
-  - **Scroll Behavior:** The App Bar uses `exitUntilCollapsed` behavior. When a title is tapped in a collapsed state, the UI must scroll to the top to expand the bar before focusing the input.
-- **Add Item:** A streamlined input for the Item Title and Item Description. The Description input begins as a single row but expands vertically as the user enters more text; the bottom sheet itself expands to accommodate this growing content.
-- **Multi-Select & Bulk Delete:**
-  - **Trigger:** Long-pressing an item title in the List Detail Screen transitions the UI to a multi-select state.
-  - **Selection:** The pressed item is selected; other items can be selected by tapping them.
-  - **Action:** A delete action appears in the top app bar to delete all selected items (includes a confirmation prompt).
-- **Reorder Items:** If a user starts dragging while the initially pressed item is selected (but no other items have been selected yet), the app transitions to a drag state to reorder items.
+- **Layout:** Displays a top app bar with the list name and a vertical stack of all item titles.
+- **Top App Bar:**
+  - Uses a **Material 3 Medium Top App Bar** where the List Title is positioned below the leading/trailing icon buttons to allow for **two-line wrapping**. 
+  - **Actions:** Contains an overflow menu with a **Delete** menu item. Tapping **Delete** triggers a confirmation prompt to delete the entire list and its items. After deletion, the user is taken back to the Home Screen.
+  - **Tap-to-Edit:** The List Title is editable via a **Tap-to-Edit** trigger. This trigger is only active when the **Medium Top App Bar** is in its expanded state; editing is disabled in the collapsed state. Tapping the title activates it for editing without causing layout shifts.
+  - **Save Action:** While in Edit Mode, a **Save** button appears as a trailing action in the **Medium Top App Bar**, replacing the overflow menu. Tapping **Save** persists the edits and returns the UI to a read-only state. If the user attempts to navigate away (including via the **system Back gesture**) without saving, they are prompted to save or discard their draft. This draft state applies only to text edits.
+  - **Scroll Behavior:** The App Bar should collapse as the user scrolls down and re-expand when scrolling to the top. Tapping the title in a collapsed state does nothing; the user must scroll to expand the bar before editing.
+- **Item Interactions:**
+  - **Tap:** Tapping an item opens the **Item Detail Screen**.
+  - **Long-press:** Long-pressing an item transitions the UI to a multi-select state where:
+    - The pressed item is selected initially.
+    - Other items can be added to the selection by tapping them.
+    - The top app bar should transition to a new top app bar that contains:
+      - A close icon that exits the multi-select state.
+      - The number of selected items.
+      - A delete action. Tapping the delete action prompts the user for confirmation and then deletes all selected items.
+  - **Drag:** If the user **drags** the item immediately after the initial long-press (without lifting their finger), the app transitions from the multi-select state to a **reorder drag-and-drop** state. The selected item can then be dragged to reorder it in the list. Reordering actions are saved immediately upon the completion of the drag gesture and are not part of the "Save/Discard" draft flow.
+- **Add Item:** A FAB opens a bottom sheet to enter the Item Title and Item Description. The Save button is located in the **bottom-right** of the sheet to ensure easy one-handed access. The Description input begins as a single row but expands vertically as the user enters more text; the bottom sheet itself expands to accommodate this growing content.
+  - **Dismissal:** If the user attempts to dismiss the sheet (swiping down, tapping outside, or using the **system Back gesture**) after entering text, they are prompted to save or discard their draft.
+  - **Validation:**
+    - **Item Title:** Required, max 100 characters. **Keyboard Action:** Moves focus to Description.
+    - **Item Description:** Optional, max 5,000 characters. **Keyboard Action:** Standard Enter key for line breaks.
+    - **Feedback:** Character counters and standard Material error messages. Validation acts as a "soft block" (disables Save button).
+- **Empty State:** Display a centered minimalist icon and the text:
+  - *"Your list is empty."* (Heading)
+  - *"Add your first item to get started."* (Body)
 
-### 3.3 Item Detail View (Full-Screen)
+### 3.3 Item Detail Screen
 
-- **Layout (Full-Screen):** Tapping an item opens a full-screen modal showing the full description. This view uses a **Material 3 Medium Top App Bar** with the Item Title positioned below the leading/trailing icon buttons to allow for **two-line wrapping**. 
-- **Tap-to-Edit:** Tapping the Title or Description field directly transitions that specific field into an active `TextField`.
-- **Save Action:** Similar to the List Detail Screen, an explicit **Save** button appears in Edit Mode (either in the Top App Bar or atop the keyboard) to commit the edit and return to a read-only state.
-- **Delete Item:** The delete action is located within the **Item Detail View**. Tapping delete triggers a **confirmation prompt**.
+- **Layout:** Displays a top app bar with the item title and a body with the description
+- **Top App Bar:**
+  - Uses a **Material 3 Medium Top App Bar** where the List Title is positioned below the leading/trailing icon buttons to allow for **two-line wrapping**.
+  - **Actions:** Contains an overflow menu with a **Delete** menu item. Tapping **Delete** triggers a confirmation prompt to delete the item. After deletion, the user is taken back to the List Detail Screen.
+  - **Tap-to-Edit:** The Item Title is editable via a **Tap-to-Edit** trigger. This trigger is only active when the **Medium Top App Bar** is in its expanded state; editing is disabled in the collapsed state. Tapping the title activates it for editing without causing layout shifts.
+  - **Save Action:** While in Edit Mode, a **Save** button appears as a trailing action in the **Medium Top App Bar**, replacing the overflow menu. Tapping **Save** persists the edits and returns the UI to a read-only state. If the user attempts to navigate away (including via the **system Back gesture**) without saving, they are prompted to save or discard their draft.
+  - **Scroll Behavior:** The App Bar should collapse as the user scrolls down and re-expand when scrolling to the top. Tapping the title in a collapsed state does nothing; the user must scroll to expand the bar before editing.
+
+- **Body:**
+  - Displays the Item Description
+  - **Tap-to-Edit:** The Item Description is editable via a **Tap-to-Edit** trigger. Tapping the description activates it for editing without causing layout shifts.
 
 ---
 
 ## 4. Non-Functional Requirements
 
-- **Speed:** The transition from the Home Screen to a List Detail screen must be near-instant.
-- **One-Handed Utility:** Primary "Add" and "Save" buttons are located in the "bottom-third" of the screen for easy thumb access.
-- **Reliability:** The app must function perfectly without an active internet connection.
+- **Speed:** Instant transitions between Home and Detail screens.
+- **One-Handed Utility:** Interactive actions (Add FAB) should be in the bottom-third. Primary Save/Menu actions should be in the Top App Bar for consistency with Material 3 patterns.
+- **Reliability:** Fully functional offline.
 
 ---
 

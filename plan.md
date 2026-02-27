@@ -2,58 +2,56 @@
 
 ## 1. System Overview
 
-**ListBox** is a mobile-first list manager built with **Compose Multiplatform (CMP)**. It utilizes a vertical, item-based architecture to replace traditional horizontal spreadsheets, optimized for one-handed use, high-performance reordering, and bulk management.
+**ListBox** is a mobile-first list manager built with **Compose Multiplatform (CMP)**. See [requirements.md](file:///Users/cory/Projects/list-box/requirements.md) for product details.
 
 ## 2. Technology Stack
 
 
-| Layer                    | Technology                  | Rationale                                                 |
-| ------------------------ | --------------------------- | --------------------------------------------------------- |
-| **UI Framework**         | Compose Multiplatform (CMP) | Shared Material 3 UI for Android and iOS.                 |
-| **Navigation**           | Navigation 3                | Official state-driven navigation for cross-platform apps. |
-| **Dependency Injection** | kotlin-inject               | Compile-time safe DI for Kotlin Multiplatform.            |
-| **Database**             | SQLDelight                  | Type-safe SQLite persistence with native drivers.         |
-| **Logic/State**          | ViewModel + StateFlow       | Standard UDF with multiplatform-capable ViewModels.       |
+| Layer                    | Technology                  | Rationale                                        |
+| ------------------------ | --------------------------- | ------------------------------------------------ |
+| **UI Framework**         | Compose Multiplatform (CMP) | Shared Material 3 UI for Android and iOS.        |
+| **Navigation**           | Navigation 3                | Official state-driven cross-platform navigation. |
+| **Dependency Injection** | kotlin-inject               | Compile-time safe DI for KMP.                    |
+| **Database**             | SQLDelight                  | Type-safe SQLite persistence.                    |
+| **Logic/State**          | ViewModel + StateFlow       | Standard UDF with multiplatform ViewModels.      |
 
 
 ---
 
 ## 3. Data Model (SQLDelight)
 
-The schema is "Sync-Ready," using **UUID v4** for primary keys and **Fractional Indexing** for item reordering.
+Uses **UUID v4** for primary keys and **Fractional Indexing** for item reordering.
 
 ### 3.1 Table: `listEntity`
 
 
-| Field         | Type      | Constraint    | Description                        |
-| ------------- | --------- | ------------- | ---------------------------------- |
-| **id**        | `TEXT`    | `PRIMARY KEY` | Client-generated UUID v4.          |
-| **title**     | `TEXT`    | `NOT NULL`    | The name of the list.              |
-| **createdAt** | `INTEGER` | `NOT NULL`    | Epoch milliseconds.                |
-| **updatedAt** | `INTEGER` | `NOT NULL`    | Epoch milliseconds for sync logic. |
-| **isDeleted** | `INTEGER` | `DEFAULT 0`   | Soft-delete flag (0 or 1).         |
+| Field         | Type      | Constraint    | Description                                 |
+| ------------- | --------- | ------------- | ------------------------------------------- |
+| **id**        | `TEXT`    | `PRIMARY KEY` | Client-generated UUID v4.                   |
+| **title**     | `TEXT`    | `NOT NULL`    | Max 100 chars.                              |
+| **createdAt** | `INTEGER` | `NOT NULL`    | Epoch milliseconds.                         |
+| **updatedAt** | `INTEGER` | `NOT NULL`    | Epoch milliseconds for eventual sync logic. |
 
 
 ### 3.2 Table: `itemEntity`
 
 
-| Field           | Type      | Constraint    | Description                           |
-| --------------- | --------- | ------------- | ------------------------------------- |
-| **id**          | `TEXT`    | `PRIMARY KEY` | Client-generated UUID v4.             |
-| **listId**      | `TEXT`    | `NOT NULL`    | Foreign Key to `listEntity(id)`.      |
-| **title**       | `TEXT`    | `NOT NULL`    | Primary text shown in the list index. |
-| **description** | `TEXT`    | `NULLABLE`    | Detailed notes.                       |
-| **orderIndex**  | `REAL`    | `NOT NULL`    | **Fractional Indexing** value.        |
-| **updatedAt**   | `INTEGER` | `NOT NULL`    | Last edit timestamp.                  |
-| **isDeleted**   | `INTEGER` | `DEFAULT 0`   | Soft-delete flag (0 or 1).            |
+| Field           | Type      | Constraint    | Description                       |
+| --------------- | --------- | ------------- | --------------------------------- |
+| **id**          | `TEXT`    | `PRIMARY KEY` | Client-generated UUID v4.         |
+| **listId**      | `TEXT`    | `NOT NULL`    | Foreign Key to `listEntity(id)`.  |
+| **title**       | `TEXT`    | `NOT NULL`    | Primary text (Max 100 chars).     |
+| **description** | `TEXT`    | `NULLABLE`    | Detailed notes (Max 5,000 chars). |
+| **orderIndex**  | `REAL`    | `NOT NULL`    | **Fractional Indexing** value.    |
+| **updatedAt**   | `INTEGER` | `NOT NULL`    | Last edit timestamp.              |
 
 
 ### 3.3 Database Optimization
 
-An index is applied to the foreign key to ensure near-instant retrieval of items belonging to a specific list. Primary keys are indexed by default by the SQLite engine.
-
 ```sql
 CREATE INDEX idx_item_list_id ON itemEntity(listId);
+CREATE INDEX idx_item_list_order ON itemEntity(listId, orderIndex);
+CREATE INDEX idx_list_created_at ON listEntity(createdAt);
 ```
 
 ---
@@ -62,28 +60,32 @@ CREATE INDEX idx_item_list_id ON itemEntity(listId);
 
 ### 4.1 Fractional Indexing Logic
 
-To support manual reordering without mass-updating rows, `orderIndex` uses `REAL` (floating point) values. Moving an item between two others assigns it the midpoint value.
+To support manual reordering without mass-updating rows, `orderIndex` uses `REAL` (floating point) values. Moving an item between two others assigns it the midpoint value. **Drag-and-drop actions trigger an immediate write to the repository** to ensure state durability during movement. Reordering is not managed by the Draft State.
 
 ### 4.2 Selection & Drag State Machine
 
- The List Detail screen manages four primary UI states:
+The List Detail screen manages four primary UI states (for functional requirements, see [Section 3.2 of requirements.md](./requirements.md#L55)):
 
-1. **Idle:** Default viewing state. Includes **Tap-to-Edit** triggers for Title and Description fields.
-2. **Edit Mode:** Triggered by field focus from a tap gesture. Transitions specific `Text` components into active `TextField` components.
-  - *UI Action:* A **Save** button appears (Top App Bar or Keyboard Toolbar) to commit changes and return to **Idle** state.
-3. **Multi-Select:** Triggered by `onLongClick`. Tracks a `Set<UUID>` of selected IDs.
-  - *Transition:* If a drag gesture starts while `selectedIds.size == 1`, switch to **Reorder Mode.**
-4. **Reorder Mode:** Drag-and-drop active using the fractional indexing logic.
+1. **Idle:** Default state. Fields are implemented as a **Text** component matched exactly to **TextField** styling in read-only mode to ensure consistent aesthetics and layout.
+2. **Edit Mode:** Swaps **Text** for and active **TextField** with identical dimensions to ensure zero layout shift. The ViewModel holds a **Draft State** separate from the repository until changes are committed. Tapping **Save** persists the edits from the Draft State to the database.
+3. **Multi-Select:** Triggered by `onLongClick`. Managed via a `Set<UUID>` of seleted item IDs in the ViewModel.
+4. **Reorder Mode:** Active for single-item movement using fractional indexing.
 
-### 4.3 Navigation & Modals
+### 4.3 App Bar & Menu Actions
 
-- **"Add Item" View:** Implemented as a **Bottom Half-Sheet Modal**. The description text field is configured for dynamic height, causing the modal to expand vertically as content is added.
-- **"Item Detail" View:** Implemented as a **Full-Screen Modal** for focused reading and long-form editing.
-  - **Component Transition:** The UI within the modal dynamically transitions between `Text` and `TextField` components based on the active **Tap-to-Edit** state triggered by field focus.
+- **List & Item Detail Overflow:** The Top App Bar contains an overflow menu (three-dot icon) with a **Delete** action. In the List Detail screen, this deletes the entire list and navigates to Home. In the Item Detail screen, this deletes the individual item and navigates back to List Detail. Both require a confirmation dialog.
+- **Top App Bar Save Action:** Standardized to the trailing action section of the Top App Bar for consistency across List and Item detail screens. It handles focus management and commit visibility.
+### 4.4 Navigation & Screens
 
-### 4.4 Reactive Repository
+- **Home Screen States:**
+  - **Empty vs Populated:** Managed via `Flow<List<ListEntity>>`. Template buttons are injected into the UI list when the database is empty.
+- **"Add Item" View:** Implemented as a `ModalBottomSheetLayout`. The text field uses `onTextLayoutResult` to calculate dynamic height for expansion.
+  - **Dismissal Handling:** Intercepting the dismissal signal tracks `isDirty` in the ViewModel to present a confirmation dialog.
+- **"Item Detail" View:** Implemented as a **Full Screen** component using the same **component swapping** (Text -> TextField) strategy as the List Detail screen.
 
-The **Repository Layer** provides `Flow<List<Item>>` to the UI. Because SQLDelight is a reactive driver, any change to the database (adding an item via the bottom sheet or reordering via drag-and-drop) will automatically trigger a recomposition of the UI.
+### 4.5 Reactive Repository
+
+The **Repository Layer** provides `Flow<List<Item>>` and `Flow<List<ListEntity>>` to the UI. Because SQLDelight is a reactive driver, any change to the database (adding an item via the bottom sheet or reordering via drag-and-drop) will automatically trigger a recomposition of the UI.
 
 ---
 
@@ -92,7 +94,6 @@ The **Repository Layer** provides `Flow<List<Item>>` to the UI. Because SQLDelig
 ### 5.1 Local-First vs. Cloud-Ready
 
 - **UUIDs:** Used to prevent ID collisions during future synchronization.
-- **Soft Deletes:** Both `listEntity` and `itemEntity` use `isDeleted` to allow future sync engines to resolve deletions across clients.
 - **Timestamps:** Rows track `updatedAt` to enable incremental "delta" syncing.
 
 ### 5.2 Dependency Injection
