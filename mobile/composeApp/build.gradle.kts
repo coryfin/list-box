@@ -6,12 +6,15 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    id("app.cash.sqldelight") version "2.0.1"
 }
 
 kotlin {
     androidTarget {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = "11"
+            }
         }
     }
     
@@ -29,6 +32,7 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.sqldelight.driver.android)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -39,10 +43,20 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(libs.sqldelight.runtime)
+        }
+        iosMain.dependencies {
+            implementation(libs.sqldelight.driver.native)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
+    }
+}
+
+sqldelight {
+    databases.create("ListBoxDatabase") {
+        packageName.set("com.coreo.listbox.database")
     }
 }
 

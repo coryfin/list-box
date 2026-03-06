@@ -1,0 +1,30 @@
+CREATE TABLE listEntity (
+    id TEXT PRIMARY KEY NOT NULL,
+    title TEXT NOT NULL,
+    createdAt INTEGER NOT NULL
+);
+
+-- Index for sorting lists by creation date
+CREATE INDEX idx_list_created_at ON listEntity(createdAt DESC);
+
+-- Queries
+insertList:
+INSERT INTO listEntity(id, title, createdAt)
+VALUES (?, ?, ?);
+
+getAllLists:
+SELECT id, title, createdAt FROM listEntity
+ORDER BY createdAt DESC;
+
+updateListTitle:
+UPDATE listEntity
+SET title = ?
+WHERE id = ?;
+
+deleteList:
+DELETE FROM listEntity
+WHERE id = ?;
+
+getListById:
+SELECT id, title, createdAt FROM listEntity
+WHERE id = ?;
