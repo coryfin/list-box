@@ -54,13 +54,13 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [x] Implement `deleteList(listId: String)`
 - [x] Use SQLDelight coroutines-extensions library with `.asFlow()` and `.map()` transformations
 
-### 2.3 Build Home Screen Basic Structure [LIST-7]
+### 2.3 Build Home Screen Basic Structure [LIST-7] ✅ COMPLETED
 
-- [ ] Create `HomeScreen` composable
-- [ ] Set up basic Material 3 top app bar with "Lists" title
-- [ ] Create empty state layout (centered icon + text)
-- [ ] Create list item composable for displaying a list
-- [ ] Connect to `getAllLists()` repository flow and display in LazyColumn
+- [x] Create `HomeScreen` composable
+- [x] Set up basic Material 3 top app bar with "Lists" title
+- [x] Create empty state layout (centered icon + text)
+- [x] Create list item composable for displaying a list
+- [x] Connect to `getAllLists()` repository flow and display in LazyColumn
 
 ### 2.4 Implement Empty State with Template Buttons [LIST-8]
 

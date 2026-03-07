@@ -1,6 +1,7 @@
 package com.coreo.listbox.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -8,6 +9,8 @@ import androidx.compose.runtime.setValue
 import com.coreo.listbox.screens.HomeScreen
 import com.coreo.listbox.screens.ItemDetailScreen
 import com.coreo.listbox.screens.ListDetailScreen
+import com.coreo.listbox.viewmodel.HomeViewModel
+import com.coreo.listbox.di.ServiceLocator
 
 sealed class NavigationState {
     object Home : NavigationState()
@@ -18,13 +21,18 @@ sealed class NavigationState {
 @Composable
 actual fun ListBoxNavHost() {
     var currentState by remember { mutableStateOf<NavigationState>(NavigationState.Home) }
+    val repository = remember { ServiceLocator.getRepository() }
     
     when (currentState) {
         NavigationState.Home -> {
+            val homeViewModel = remember { HomeViewModel(repository) }
+            val lists = homeViewModel.lists.collectAsState().value
+            
             HomeScreen(
                 onListSelect = { listId ->
                     currentState = NavigationState.ListDetail(listId)
-                }
+                },
+                listEntities = lists
             )
         }
         
