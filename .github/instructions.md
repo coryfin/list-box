@@ -61,3 +61,7 @@ Resolves LIST-2
 - **First line:** Linear issue identifier followed by a brief description (e.g., `LIST-2 Set up SQLDelight database layer`)
 - **Body (optional):** Detailed description of changes, improvements, or notes
 - **Last line:** `Resolves {LINEAR_ISSUE_NUMBER}` to link the commit to the Linear issue
+
+### 3. Merge branch
+
+I working on a feature branch, merge the feature branch into main locally, then switch to the main branch and delete the feature branch.
