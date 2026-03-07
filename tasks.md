@@ -45,14 +45,14 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [x] Write query to fetch all lists sorted by `createdAt DESC`
 - [x] Test queries with sample data (integration through Repository)
 
-### 2.2 Implement ListBoxRepository - List Operations [LIST-6]
+### 2.2 Implement ListBoxRepository - List Operations [LIST-6] ✅ COMPLETED
 
-- [ ] Create `ListEntity` data class
-- [ ] Implement `getAllLists(): Flow<List<ListEntity>>`
-- [ ] Implement `createList(title: String): ListEntity`
-- [ ] Implement `updateListTitle(listId: String, newTitle: String)`
-- [ ] Implement `deleteList(listId: String)`
-- [ ] Unit test list repository methods
+- [x] Create `ListEntity` data class (SQLDelight generated)
+- [x] Implement `getAllLists(): Flow<List<ListEntity>>`
+- [x] Implement `createList(title: String): ListEntity`
+- [x] Implement `updateListTitle(listId: String, newTitle: String)`
+- [x] Implement `deleteList(listId: String)`
+- [x] Use SQLDelight coroutines-extensions library with `.asFlow()` and `.map()` transformations
 
 ### 2.3 Build Home Screen Basic Structure [LIST-7]
 

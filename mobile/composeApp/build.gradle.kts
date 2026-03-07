@@ -45,6 +45,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.sqldelight.runtime)
+            implementation(libs.sqldelight.coroutines)
             implementation(libs.kotlin.inject)
         }
         iosMain.dependencies {
@@ -52,6 +53,7 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
         }
     }
 }
