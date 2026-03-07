@@ -62,7 +62,7 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [x] Create list item composable for displaying a list
 - [x] Connect to `getAllLists()` repository flow and display in LazyColumn
 
-### 2.4 Implement Empty State with Template Buttons [LIST-8]
+### 2.4 Implement Empty State with Template Buttons [LIST-8] ⏳ IN PROGRESS
 
 - [ ] Add "Blank List" button to empty state
 - [ ] Add "Gift Ideas" template button to empty state

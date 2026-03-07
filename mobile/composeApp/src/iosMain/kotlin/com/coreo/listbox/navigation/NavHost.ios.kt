@@ -32,6 +32,18 @@ actual fun ListBoxNavHost() {
                 onListSelect = { listId ->
                     currentState = NavigationState.ListDetail(listId)
                 },
+                onCreateBlankList = {
+                    val newList = homeViewModel.createListAndGetId("")
+                    if (newList != null) {
+                        currentState = NavigationState.ListDetail(newList.id)
+                    }
+                },
+                onCreateFromTemplate = { templateType ->
+                    val newList = homeViewModel.createListFromTemplateAndGetId(templateType)
+                    if (newList != null) {
+                        currentState = NavigationState.ListDetail(newList.id)
+                    }
+                },
                 listEntities = lists
             )
         }

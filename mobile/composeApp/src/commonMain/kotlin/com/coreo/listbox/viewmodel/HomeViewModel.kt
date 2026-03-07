@@ -19,4 +19,46 @@ class HomeViewModel(private val repository: ListBoxRepository) : ViewModel() {
             repository.createList(title)
         }
     }
+    
+    suspend fun createListAndGetId(title: String): ListEntity? {
+        return try {
+            repository.createList(title)
+        } catch (e: Exception) {
+            null
+        }
+    }
+    
+    suspend fun createListFromTemplateAndGetId(templateType: String): ListEntity? {
+        return try {
+            val (title, exampleItemTitle, descriptionLabels) = when (templateType) {
+                "gift-ideas" -> Triple(
+                    "Gift Ideas",
+                    "Example Gift",
+                    listOf("Store:", "Price:", "Recipient:")
+                )
+                "recipe-box" -> Triple(
+                    "Recipe Box",
+                    "Quick Recipe",
+                    listOf("Ingredients:", "Instructions:")
+                )
+                "goal-tracker" -> Triple(
+                    "Goal Tracker",
+                    "Example Goal",
+                    listOf("Success Criteria:", "Target Date:")
+                )
+                else -> return null
+            }
+            
+            // Create the list
+            val newList = repository.createList(title)
+            
+            // Create an example item with template labels
+            val descriptionText = descriptionLabels.joinToString("\n")
+            repository.createItem(newList.id, exampleItemTitle, descriptionText, 0)
+            
+            newList
+        } catch (e: Exception) {
+            null
+        }
+    }
 }

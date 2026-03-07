@@ -10,23 +10,29 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.coreo.listbox.database.ListEntity
 import com.coreo.listbox.util.formatDateForListCard
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onListSelect: (String) -> Unit,
+    onCreateBlankList: suspend () -> Unit,
+    onCreateFromTemplate: suspend (String) -> Unit,
     listEntities: List<ListEntity> = emptyList()
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
@@ -40,7 +46,10 @@ fun HomeScreen(
         )
         
         if (listEntities.isEmpty()) {
-            EmptyListState()
+            EmptyListState(
+                onCreateBlankList = onCreateBlankList,
+                onCreateFromTemplate = onCreateFromTemplate
+            )
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -59,7 +68,12 @@ fun HomeScreen(
 }
 
 @Composable
-private fun EmptyListState() {
+private fun EmptyListState(
+    onCreateBlankList: suspend () -> Unit,
+    onCreateFromTemplate: suspend (String) -> Unit
+) {
+    val coroutineScope = rememberCoroutineScope()
+    
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -68,16 +82,85 @@ private fun EmptyListState() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Your lists is empty.",
+            text = "Your lists are empty.",
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurface
         )
         Text(
-            text = "Tap the button below to create your first list.",
+            text = "Create your first list to get started.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 12.dp)
         )
+        
+        // Blank List Button
+        Button(
+            onClick = {
+                coroutineScope.launch {
+                    onCreateBlankList()
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 24.dp)
+        ) {
+            Text("Blank List")
+        }
+        
+        // Template Buttons
+        Text(
+            text = "Or choose a template:",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .padding(top = 24.dp)
+                .align(Alignment.Start)
+        )
+        
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            TemplateButton(
+                title = "Gift Ideas",
+                onClick = {
+                    coroutineScope.launch {
+                        onCreateFromTemplate("gift-ideas")
+                    }
+                }
+            )
+            TemplateButton(
+                title = "Recipe Box",
+                onClick = {
+                    coroutineScope.launch {
+                        onCreateFromTemplate("recipe-box")
+                    }
+                }
+            )
+            TemplateButton(
+                title = "Goal Tracker",
+                onClick = {
+                    coroutineScope.launch {
+                        onCreateFromTemplate("goal-tracker")
+                    }
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun TemplateButton(
+    title: String,
+    onClick: () -> Unit
+) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(title)
     }
 }
 

@@ -69,4 +69,18 @@ class ListBoxRepository(private val database: ListBoxDatabase) {
     suspend fun deleteList(listId: String) {
         database.listEntityQueries.deleteList(id = listId)
     }
+    
+    /**
+     * Create a new item with an auto-generated UUID
+     */
+    suspend fun createItem(listId: String, title: String, description: String?, position: Int = 0) {
+        val id = generateUUID()
+        database.itemEntityQueries.insertItem(
+            id = id,
+            listId = listId,
+            title = title,
+            description = description,
+            position = position.toLong()
+        )
+    }
 }

@@ -25,32 +25,7 @@ object DatabaseProvider {
     }
     
     fun addSampleData() {
-        if (!sampleDataAdded && isInitialized) {
-            val now = getCurrentTimestampMillis()
-            
-            // Add three sample lists for testing
-            database.listEntityQueries.insertList(
-                id = generateUUID(),
-                title = "Gift Ideas",
-                createdAt = now - 86400000 * 3, // 3 days ago
-                updatedAt = now - 86400000 * 3
-            )
-            
-            database.listEntityQueries.insertList(
-                id = generateUUID(),
-                title = "Recipe Box",
-                createdAt = now - 86400000 * 2, // 2 days ago
-                updatedAt = now - 86400000 * 2
-            )
-            
-            database.listEntityQueries.insertList(
-                id = generateUUID(),
-                title = "Personal Goals",
-                createdAt = now - 86400000, // 1 day ago
-                updatedAt = now - 86400000
-            )
-            
-            sampleDataAdded = true
-        }
+        // Sample data removed - starting with empty database
+        sampleDataAdded = true
     }
 }
