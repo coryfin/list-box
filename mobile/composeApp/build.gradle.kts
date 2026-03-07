@@ -44,6 +44,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.sqldelight.runtime)
+            implementation(libs.kotlin.inject)
         }
         iosMain.dependencies {
             implementation(libs.sqldelight.driver.native)

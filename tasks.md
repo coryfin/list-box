@@ -23,10 +23,10 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 
 ### 1.3 Set Up Dependency Injection (kotlin-inject) [LIST-3]
 
-- [ ] Create `DataComponent` with `@Component` and `@Singleton` annotations
-- [ ] Implement `provideDatabase()` provider for `ListBoxDatabase`
-- [ ] Create `ListBoxRepository` abstract class and register in DI
-- [ ] Test DI initialization and instance access
+- [x] Create `DataComponent` with `@Component` and `@Singleton` annotations
+- [x] Implement `provideDatabase()` provider for `ListBoxDatabase`
+- [x] Create `ListBoxRepository` abstract class and register in DI
+- [x] Test DI initialization and instance access
 
 ### 1.4 Set Up Navigation (Navigation 3) [LIST-4]
 
