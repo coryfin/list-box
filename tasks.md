@@ -15,11 +15,11 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 
 ### 1.2 Set Up SQLDelight Database Layer [LIST-2]
 
-- [ ] Create SQLDelight schema file with `listEntity` table
-- [ ] Create SQLDelight schema file with `itemEntity` table
-- [ ] Create necessary database indexes (list creation date, item list+order)
-- [ ] Generate SQLDelight database code
-- [ ] Test database initialization on both platforms
+- [x] Create SQLDelight schema file with `listEntity` table
+- [x] Create SQLDelight schema file with `itemEntity` table
+- [x] Create necessary database indexes (list creation date, item list+order)
+- [x] Generate SQLDelight database code
+- [x] Test database initialization on both platforms
 
 ### 1.3 Set Up Dependency Injection (kotlin-inject) [LIST-3]
 
