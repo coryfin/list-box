@@ -32,8 +32,8 @@ actual fun ListBoxNavHost() {
                 onListSelect = { listId ->
                     currentState = NavigationState.ListDetail(listId)
                 },
-                onCreateBlankList = {
-                    val newList = homeViewModel.createListAndGetId("")
+                onCreateBlankList = { title ->
+                    val newList = homeViewModel.createListAndGetId(title)
                     if (newList != null) {
                         currentState = NavigationState.ListDetail(newList.id)
                     }

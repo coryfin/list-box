@@ -30,8 +30,8 @@ actual fun ListBoxNavHost() {
                 onListSelect = { listId ->
                     navController.navigate(Routes.listDetail(listId))
                 },
-                onCreateBlankList = {
-                    val newList = homeViewModel.createListAndGetId("")
+                onCreateBlankList = { title ->
+                    val newList = homeViewModel.createListAndGetId(title)
                     if (newList != null) {
                         navController.navigate(Routes.listDetail(newList.id))
                     }

@@ -71,13 +71,13 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [ ] Implement template data (pre-filled title + description labels)
 - [ ] Test empty state renders correctly
 
-### 2.5 Implement "Blank List" Creation [LIST-17]
+### 2.5 Implement "Blank List" Creation [LIST-17] ✅ COMPLETED
 
-- [ ] Create `CreateListDialog` composable with title input field
-- [ ] Implement validation: required, max 100 chars
-- [ ] Call repository `createList()` on confirm
-- [ ] Navigate to `ListDetailScreen` after creation
-- [ ] Test dialog dismissal (cancel behavior)
+- [x] Create `CreateListDialog` composable with title input field
+- [x] Implement validation: required, max 100 chars
+- [x] Call repository `createList()` on confirm
+- [x] Navigate to `ListDetailScreen` after creation
+- [x] Test dialog dismissal (cancel behavior)
 
 ### 2.6 Implement List Item Tap Navigation [LIST-9]
 
