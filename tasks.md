@@ -28,12 +28,12 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [x] Create `ListBoxRepository` abstract class and register in DI
 - [x] Test DI initialization and instance access
 
-### 1.4 Set Up Navigation (Navigation 3) [LIST-4]
+### 1.4 Set Up Navigation (Navigation 3) [LIST-4] ✅ COMPLETED
 
-- [ ] Configure Navigation 3 for multiplatform
-- [ ] Define navigation routes: Home, ListDetail, ItemDetail
-- [ ] Create NavHost composable structure
-- [ ] Test basic navigation between screens
+- [x] Configure Navigation 3 for multiplatform
+- [x] Define navigation routes: Home, ListDetail, ItemDetail
+- [x] Create NavHost composable structure
+- [x] Test basic navigation between screens
 
 ---
 
