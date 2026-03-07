@@ -19,10 +19,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.coreo.listbox.components.CreateListDialog
 import com.coreo.listbox.database.ListEntity
 import com.coreo.listbox.util.formatDateForListCard
 import kotlinx.coroutines.launch
@@ -31,7 +36,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     onListSelect: (String) -> Unit,
-    onCreateBlankList: suspend () -> Unit,
+    onCreateBlankList: suspend (String) -> Unit,
     onCreateFromTemplate: suspend (String) -> Unit,
     listEntities: List<ListEntity> = emptyList()
 ) {
@@ -69,10 +74,23 @@ fun HomeScreen(
 
 @Composable
 private fun EmptyListState(
-    onCreateBlankList: suspend () -> Unit,
+    onCreateBlankList: suspend (String) -> Unit,
     onCreateFromTemplate: suspend (String) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
+    var showCreateDialog by remember { mutableStateOf(false) }
+    
+    if (showCreateDialog) {
+        CreateListDialog(
+            onDismiss = { showCreateDialog = false },
+            onCreate = { title ->
+                coroutineScope.launch {
+                    onCreateBlankList(title)
+                }
+                showCreateDialog = false
+            }
+        )
+    }
     
     Column(
         modifier = Modifier
@@ -96,9 +114,7 @@ private fun EmptyListState(
         // Blank List Button
         Button(
             onClick = {
-                coroutineScope.launch {
-                    onCreateBlankList()
-                }
+                showCreateDialog = true
             },
             modifier = Modifier
                 .fillMaxWidth()
