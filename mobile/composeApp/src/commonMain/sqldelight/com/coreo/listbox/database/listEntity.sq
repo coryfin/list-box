@@ -1,7 +1,8 @@
 CREATE TABLE listEntity (
     id TEXT PRIMARY KEY NOT NULL,
     title TEXT NOT NULL,
-    createdAt INTEGER NOT NULL
+    createdAt INTEGER NOT NULL,
+    updatedAt INTEGER NOT NULL
 );
 
 -- Index for sorting lists by creation date
@@ -9,16 +10,16 @@ CREATE INDEX idx_list_created_at ON listEntity(createdAt DESC);
 
 -- Queries
 insertList:
-INSERT INTO listEntity(id, title, createdAt)
-VALUES (?, ?, ?);
+INSERT INTO listEntity(id, title, createdAt, updatedAt)
+VALUES (?, ?, ?, ?);
 
 getAllLists:
-SELECT id, title, createdAt FROM listEntity
+SELECT id, title, createdAt, updatedAt FROM listEntity
 ORDER BY createdAt DESC;
 
 updateListTitle:
 UPDATE listEntity
-SET title = ?
+SET title = ?, updatedAt = ?
 WHERE id = ?;
 
 deleteList:
@@ -26,5 +27,5 @@ DELETE FROM listEntity
 WHERE id = ?;
 
 getListById:
-SELECT id, title, createdAt FROM listEntity
+SELECT id, title, createdAt, updatedAt FROM listEntity
 WHERE id = ?;

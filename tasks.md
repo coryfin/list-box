@@ -39,11 +39,11 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 
 ## Phase 2: Home Screen (List Index)
 
-### 2.1 Implement Database Queries for Lists (SQLDelight) [LIST-5]
+### 2.1 Implement Database Queries for Lists (SQLDelight) [LIST-5] ✅ COMPLETED
 
-- [ ] Write query to insert/update/delete `listEntity` records
-- [ ] Write query to fetch all lists sorted by `createdAt DESC`
-- [ ] Test queries with sample data
+- [x] Write query to insert/update/delete `listEntity` records
+- [x] Write query to fetch all lists sorted by `createdAt DESC`
+- [x] Test queries with sample data (integration through Repository)
 
 ### 2.2 Implement ListBoxRepository - List Operations [LIST-6]
 

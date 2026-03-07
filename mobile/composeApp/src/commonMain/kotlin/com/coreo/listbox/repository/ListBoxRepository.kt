@@ -1,6 +1,7 @@
 package com.coreo.listbox.repository
 
 import com.coreo.listbox.database.ListBoxDatabase
+import com.coreo.listbox.util.getCurrentTimestampMillis
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -20,10 +21,12 @@ class ListBoxRepository(private val database: ListBoxDatabase) {
      * Create a new list
      */
     fun createList(id: String, title: String, createdAt: Long) {
+        val now = getCurrentTimestampMillis()
         database.listEntityQueries.insertList(
             id = id,
             title = title,
-            createdAt = createdAt
+            createdAt = createdAt,
+            updatedAt = now
         )
     }
     
@@ -31,8 +34,10 @@ class ListBoxRepository(private val database: ListBoxDatabase) {
      * Update a list title
      */
     fun updateListTitle(listId: String, newTitle: String) {
+        val now = getCurrentTimestampMillis()
         database.listEntityQueries.updateListTitle(
             title = newTitle,
+            updatedAt = now,
             id = listId
         )
     }

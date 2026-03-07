@@ -12,8 +12,9 @@ This skill streamlines task startup by:
 1. **Accepting** a specific Linear issue ID from the user
 2. **Fetching** complete issue details from Linear
 3. **Updating** `tasks.md` with the current issue
-4. **Reviewing** `requirements.md` and `plan.md` for project-level specs
-5. **Providing** implementation guidance based on issue description
+4. **Setting** the Linear issue status to "In Progress"
+5. **Reviewing** `requirements.md` and `plan.md` for project-level specs
+6. **Providing** implementation guidance based on issue description
 
 ## Workflow Steps
 
@@ -52,7 +53,24 @@ Add/update entry in `tasks.md` for the given issue:
 - Mark checkboxes as current work
 - Link to Linear issue if not already present
 
-### Step 4: Implementation Guidance
+### Step 4: Update Linear Issue Status
+
+Update the Linear issue status to "In Progress":
+
+- Use Linear MCP to update the issue state
+- Sets the issue workflow state to "In Progress"
+- Maintains all other issue properties unchanged
+
+**Pseudo-code:**
+
+```
+linear.save_issue(
+  id: issueId,
+  state: "In Progress"
+)
+```
+
+### Step 5: Implementation Guidance
 
 Extract implementation hints from issue description:
 
@@ -109,6 +127,9 @@ Skill: Fetching LIST-6 from Linear...
 Skill: Selected: LIST-6 Add drag-and-drop reordering
 
 [Updates tasks.md locally]
+
+[Updates Linear issue status to In Progress]
+
 [Suggests git branch: LIST-6-add-drag-and-drop]
 
 Skill: Ready to start! Here's what needs implementing:
