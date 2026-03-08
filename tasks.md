@@ -62,14 +62,14 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [x] Create list item composable for displaying a list
 - [x] Connect to `getAllLists()` repository flow and display in LazyColumn
 
-### 2.4 Implement Empty State with Template Buttons [LIST-8] ⏳ IN PROGRESS
+### 2.4 Implement Empty State with Template Buttons [LIST-8] ✅ COMPLETED
 
-- [ ] Add "Blank List" button to empty state
-- [ ] Add "Gift Ideas" template button to empty state
-- [ ] Add "Recipe Box" template button to empty state
-- [ ] Add "Goal Tracker" template button to empty state
-- [ ] Implement template data (pre-filled title + description labels)
-- [ ] Test empty state renders correctly
+- [x] Add "Blank List" button to empty state  
+- [x] Add "Gift Ideas" template button to empty state  
+- [x] Add "Recipe Box" template button to empty state  
+- [x] Add "Goal Tracker" template button to empty state  
+- [x] Implement template data (pre-filled title + description labels)  
+- [x] Test empty state renders correctly
 
 ### 2.5 Implement "Blank List" Creation [LIST-17] ✅ COMPLETED
 
@@ -79,11 +79,11 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [x] Navigate to `ListDetailScreen` after creation
 - [x] Test dialog dismissal (cancel behavior)
 
-### 2.6 Implement List Item Tap Navigation [LIST-9]
+### 2.6 Implement List Item Tap Navigation [LIST-11] ✅ COMPLETED
 
-- [ ] Add click handler to list items
-- [ ] Navigate to `ListDetailScreen` with list ID parameter
-- [ ] Test navigation works on both platforms
+- [x] Add click handler to list items
+- [x] Navigate to `ListDetailScreen` with list ID parameter
+- [x] Test navigation works on both platforms
 
 ### 2.7 Implement Populated State (Hide Templates) [LIST-10]
 
