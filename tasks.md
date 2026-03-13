@@ -85,14 +85,14 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [x] Navigate to `ListDetailScreen` with list ID parameter
 - [x] Test navigation works on both platforms
 
-### 2.7 Implement Populated State (Hide Templates) [LIST-10]
+### 2.7 Implement Populated State (Hide Templates) [LIST-14] [In Progress]
 
 - [ ] Show FAB when list count > 0
 - [ ] Hide template buttons when list count > 0
 - [ ] Show template buttons again when all lists are deleted
 - [ ] Test state transitions
 
-### 2.8 Implement FAB for "Add List" [LIST-11]
+### 2.8 Implement FAB for "Add List" [LIST-10] [In Progress]
 
 - [ ] Add floating action button to bottom-right of screen
 - [ ] Trigger `CreateListDialog` on FAB tap

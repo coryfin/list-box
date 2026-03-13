@@ -13,8 +13,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -40,24 +42,60 @@ fun HomeScreen(
     onCreateFromTemplate: suspend (String) -> Unit,
     listEntities: List<ListEntity> = emptyList()
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(
-            title = {
-                Text(
-                    text = "Lists",
-                    style = MaterialTheme.typography.headlineSmall
-                )
+    val coroutineScope = rememberCoroutineScope()
+    var showCreateDialog by remember { mutableStateOf(false) }
+    val isPopulated = listEntities.isNotEmpty()
+    
+    if (showCreateDialog) {
+        CreateListDialog(
+            onDismiss = { showCreateDialog = false },
+            onCreate = { title ->
+                coroutineScope.launch {
+                    onCreateBlankList(title)
+                }
+                showCreateDialog = false
             }
         )
-        
+    }
+    
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Lists",
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                }
+            )
+        },
+        floatingActionButton = {
+            if (isPopulated) {
+                FloatingActionButton(
+                    onClick = { showCreateDialog = true },
+                    containerColor = MaterialTheme.colorScheme.primary
+                ) {
+                    Text(
+                        text = "+",
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                }
+            }
+        }
+    ) { paddingValues ->
         if (listEntities.isEmpty()) {
             EmptyListState(
                 onCreateBlankList = onCreateBlankList,
-                onCreateFromTemplate = onCreateFromTemplate
+                onCreateFromTemplate = onCreateFromTemplate,
+                onShowCreateDialog = { showCreateDialog = true },
+                modifier = Modifier.padding(paddingValues)
             )
         } else {
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
@@ -75,25 +113,14 @@ fun HomeScreen(
 @Composable
 private fun EmptyListState(
     onCreateBlankList: suspend (String) -> Unit,
-    onCreateFromTemplate: suspend (String) -> Unit
+    onCreateFromTemplate: suspend (String) -> Unit,
+    onShowCreateDialog: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val coroutineScope = rememberCoroutineScope()
-    var showCreateDialog by remember { mutableStateOf(false) }
-    
-    if (showCreateDialog) {
-        CreateListDialog(
-            onDismiss = { showCreateDialog = false },
-            onCreate = { title ->
-                coroutineScope.launch {
-                    onCreateBlankList(title)
-                }
-                showCreateDialog = false
-            }
-        )
-    }
     
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(24.dp),
         verticalArrangement = Arrangement.Center,
@@ -113,9 +140,7 @@ private fun EmptyListState(
         
         // Blank List Button
         Button(
-            onClick = {
-                showCreateDialog = true
-            },
+            onClick = onShowCreateDialog,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 24.dp)
