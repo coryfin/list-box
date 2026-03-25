@@ -244,20 +244,20 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 
 ## Phase 6: List Detail Screen - Add Item (FAB & Bottom Sheet)
 
-### 6.1 Implement Add Item FAB [LIST-27a]
+### 6.1 Implement Add Item FAB [LIST-33] [In Progress]
 
-- [ ] Add floating action button to List Detail screen
-- [ ] Position in bottom-right corner
-- [ ] Open `AddItemBottomSheet` on tap
-- [ ] Test FAB appears on all states
+- [x] Add floating action button to List Detail screen
+- [x] Position in bottom-right corner
+- [x] Open `AddItemBottomSheet` on tap
+- [x] Test FAB appears on all states
 
-### 6.2 Build Add Item Bottom Sheet Structure [LIST-28]
+### 6.2 Build Add Item Bottom Sheet Structure [LIST-28] [In Progress]
 
-- [ ] Create `AddItemBottomSheet` composable
-- [ ] Implement ModalBottomSheetLayout
-- [ ] Create title input field (required, max 100 chars)
-- [ ] Create description input field (optional, max 5000 chars)
-- [ ] Position Save button in bottom-right corner
+- [x] Create `AddItemBottomSheet` composable
+- [x] Implement ModalBottomSheetLayout
+- [x] Create title input field (required, max 100 chars)
+- [x] Create description input field (optional, max 5000 chars)
+- [x] Position Save button in bottom-right corner
 
 ### 6.3 Implement Dynamic Description Expansion [LIST-29]
 

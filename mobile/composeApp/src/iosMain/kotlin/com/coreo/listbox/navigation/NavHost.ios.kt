@@ -55,7 +55,7 @@ actual fun ListBoxNavHost() {
             val listDetailViewModel = remember { ListDetailViewModel(repository, listId) }
             val items = listDetailViewModel.items.collectAsState().value
             val list = listDetailViewModel.list.collectAsState().value
-            
+
             ListDetailScreen(
                 listId = listId,
                 onItemSelect = { itemId ->
@@ -66,6 +66,9 @@ actual fun ListBoxNavHost() {
                 },
                 onDeleteList = {
                     listDetailViewModel.deleteList()
+                },
+                onSaveItem = { title, description ->
+                    listDetailViewModel.createItem(title, description)
                 },
                 items = items,
                 listTitle = list?.title ?: "List"

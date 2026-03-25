@@ -6,12 +6,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,11 +38,13 @@ fun ListDetailScreen(
     onItemSelect: (String) -> Unit,
     onBackClick: () -> Unit,
     onDeleteList: () -> Unit,
+    onSaveItem: (title: String, description: String) -> Unit = { _, _ -> },
     items: List<ItemEntity> = emptyList(),
     listTitle: String = "List"
 ) {
     var showOverflowMenu by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showAddItemSheet by remember { mutableStateOf(false) }
 
     if (showDeleteDialog) {
         AlertDialog(
@@ -65,6 +69,18 @@ fun ListDetailScreen(
     }
 
     Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showAddItemSheet = true },
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add item",
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+        },
         topBar = {
             TopAppBar(
                 title = {
@@ -104,6 +120,16 @@ fun ListDetailScreen(
             )
         }
     ) { paddingValues ->
+        if (showAddItemSheet) {
+            AddItemBottomSheet(
+                onDismiss = { showAddItemSheet = false },
+                onSave = { title, description ->
+                    onSaveItem(title, description)
+                    showAddItemSheet = false
+                }
+            )
+        }
+
         if (items.isEmpty()) {
             EmptyItemState(
                 modifier = Modifier.padding(paddingValues)
