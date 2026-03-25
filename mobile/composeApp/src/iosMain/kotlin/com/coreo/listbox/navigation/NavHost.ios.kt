@@ -10,13 +10,14 @@ import com.coreo.listbox.screens.HomeScreen
 import com.coreo.listbox.screens.ItemDetailScreen
 import com.coreo.listbox.screens.ListDetailScreen
 import com.coreo.listbox.viewmodel.HomeViewModel
+import com.coreo.listbox.viewmodel.ItemDetailViewModel
 import com.coreo.listbox.viewmodel.ListDetailViewModel
 import com.coreo.listbox.di.ServiceLocator
 
 sealed class NavigationState {
     object Home : NavigationState()
     data class ListDetail(val listId: String) : NavigationState()
-    data class ItemDetail(val itemId: String) : NavigationState()
+    data class ItemDetail(val itemId: String, val listId: String) : NavigationState()
 }
 
 @Composable
@@ -58,7 +59,7 @@ actual fun ListBoxNavHost() {
             ListDetailScreen(
                 listId = listId,
                 onItemSelect = { itemId ->
-                    currentState = NavigationState.ItemDetail(itemId)
+                    currentState = NavigationState.ItemDetail(itemId = itemId, listId = listId)
                 },
                 onBackClick = {
                     currentState = NavigationState.Home
@@ -73,11 +74,15 @@ actual fun ListBoxNavHost() {
         
         is NavigationState.ItemDetail -> {
             val itemId = (currentState as NavigationState.ItemDetail).itemId
+            val itemDetailViewModel = remember { ItemDetailViewModel(repository, itemId) }
+            val item = itemDetailViewModel.item.collectAsState().value
+
+            val listId = (currentState as NavigationState.ItemDetail).listId
             ItemDetailScreen(
                 itemId = itemId,
-                onBackClick = {
-                    currentState = NavigationState.Home
-                }
+                onBackClick = { currentState = NavigationState.ListDetail(listId) },
+                onDeleteItem = { itemDetailViewModel.deleteItem() },
+                item = item
             )
         }
     }

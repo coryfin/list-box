@@ -11,6 +11,7 @@ import com.coreo.listbox.screens.HomeScreen
 import com.coreo.listbox.screens.ItemDetailScreen
 import com.coreo.listbox.screens.ListDetailScreen
 import com.coreo.listbox.viewmodel.HomeViewModel
+import com.coreo.listbox.viewmodel.ItemDetailViewModel
 import com.coreo.listbox.viewmodel.ListDetailViewModel
 import com.coreo.listbox.di.ServiceLocator
 
@@ -71,11 +72,14 @@ actual fun ListBoxNavHost() {
         
         composable(Routes.ITEM_DETAIL) { backStackEntry ->
             val itemId = backStackEntry.arguments?.getString("itemId") ?: ""
+            val itemDetailViewModel = remember { ItemDetailViewModel(repository, itemId) }
+            val item = itemDetailViewModel.item.collectAsState().value
+
             ItemDetailScreen(
                 itemId = itemId,
-                onBackClick = {
-                    navController.navigateUp()
-                }
+                onBackClick = { navController.navigateUp() },
+                onDeleteItem = { itemDetailViewModel.deleteItem() },
+                item = item
             )
         }
     }

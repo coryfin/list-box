@@ -193,12 +193,12 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 
 ## Phase 5: Item Detail Screen
 
-### 5.1 Build Item Detail Screen Basic Structure [LIST-24]
+### 5.1 Build Item Detail Screen Basic Structure [LIST-24] [In Progress]
 
-- [ ] Create `ItemDetailScreen` composable
-- [ ] Implement Material 3 Medium Top App Bar with item title
-- [ ] Display item description in body
-- [ ] Fetch item from repository using item ID parameter
+- [x] Create `ItemDetailScreen` composable
+- [x] Implement Material 3 Medium Top App Bar with item title
+- [x] Display item description in body
+- [x] Fetch item from repository using item ID parameter
 
 ### 5.2 Implement Item Title Edit Mode (Top App Bar) [LIST-26]
 
