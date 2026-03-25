@@ -2,6 +2,7 @@ package com.coreo.listbox.repository
 
 import app.cash.sqldelight.coroutines.asFlow
 import com.coreo.listbox.database.ListBoxDatabase
+import com.coreo.listbox.database.ItemEntity
 import com.coreo.listbox.database.ListEntity
 import com.coreo.listbox.util.getCurrentTimestampMillis
 import com.coreo.listbox.util.generateUUID
@@ -82,5 +83,14 @@ class ListBoxRepository(private val database: ListBoxDatabase) {
             description = description,
             position = position.toLong()
         )
+    }
+    
+    /**
+     * Get all items for a specific list as a reactive Flow, sorted by position
+     */
+    fun getItemsForList(listId: String): Flow<List<ItemEntity>> {
+        return database.itemEntityQueries.getItemsByListId(listId)
+            .asFlow()
+            .map { it.executeAsList() }
     }
 }

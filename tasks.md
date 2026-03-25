@@ -87,16 +87,16 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 
 ### 2.7 Implement Populated State (Hide Templates) [LIST-14] [In Progress]
 
-- [ ] Show FAB when list count > 0
-- [ ] Hide template buttons when list count > 0
-- [ ] Show template buttons again when all lists are deleted
-- [ ] Test state transitions
+- [x] Show FAB when list count > 0
+- [x] Hide template buttons when list count > 0
+- [x] Show template buttons again when all lists are deleted
+- [x] Test state transitions
 
 ### 2.8 Implement FAB for "Add List" [LIST-10] [In Progress]
 
-- [ ] Add floating action button to bottom-right of screen
-- [ ] Trigger `CreateListDialog` on FAB tap
-- [ ] Test FAB appears/disappears based on list count
+- [x] Add floating action button to bottom-right of screen
+- [x] Trigger `CreateListDialog` on FAB tap
+- [x] Test FAB appears/disappears based on list count
 
 ---
 
@@ -104,14 +104,14 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 
 ### 3.1 Implement Database Queries for Items (SQLDelight) [LIST-11a]
 
-- [ ] Write query to insert/update/delete `itemEntity` records
-- [ ] Write query to fetch all items for a list sorted by `orderIndex`
-- [ ] Test queries with sample data
+- [x] Write query to insert/update/delete `itemEntity` records
+- [x] Write query to fetch all items for a list sorted by `orderIndex`
+- [x] Test queries with sample data
 
 ### 3.2 Implement ListBoxRepository - Item Operations [LIST-12]
 
-- [ ] Create `ItemEntity` data class
-- [ ] Implement `getItemsForList(listId: String): Flow<List<ItemEntity>>`
+- [x] Create `ItemEntity` data class
+- [x] Implement `getItemsForList(listId: String): Flow<List<ItemEntity>>`
 - [ ] Implement `createItem(listId: String, title: String, description: String): ItemEntity`
 - [ ] Implement `updateItem(itemId: String, title: String, description: String)`
 - [ ] Implement `deleteItem(itemId: String)`
@@ -119,11 +119,11 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 
 ### 3.3 Build List Detail Screen Basic Structure [LIST-14]
 
-- [ ] Create `ListDetailScreen` composable
-- [ ] Implement Material 3 Medium Top App Bar
-- [ ] Display list title in expanded state
-- [ ] Fetch and display list items in a LazyColumn
-- [ ] Create item composable for list items
+- [x] Create `ListDetailScreen` composable
+- [x] Implement Material 3 Medium Top App Bar
+- [x] Display list title in expanded state
+- [x] Fetch and display list items in a LazyColumn
+- [x] Create item composable for list items
 
 ### 3.4 Implement Overflow Menu & Delete List [LIST-13]
 
@@ -134,18 +134,18 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [ ] Navigate back to Home screen after deletion
 - [ ] Test cancel dismisses dialog
 
-### 3.5 Implement Empty State (No Items) [LIST-15]
+### 3.5 Implement Empty State (No Items) [LIST-15] ✅ COMPLETED
 
-- [ ] Create centered empty state view with icon + text
-- [ ] Display: "Your list is empty." + "Add your first item to get started."
-- [ ] Hide when items are added
-- [ ] Test displays when list has 0 items
+- [x] Create centered empty state view with icon + text
+- [x] Display: "Your list is empty." + "Add your first item to get started."
+- [x] Hide when items are added
+- [x] Test displays when list has 0 items
 
 ### 3.6 Implement Basic Item Tap Navigation [LIST-16]
 
-- [ ] Add click handler to item tiles
-- [ ] Navigate to `ItemDetailScreen` with item ID parameter
-- [ ] Test navigation works
+- [x] Add click handler to item tiles
+- [x] Navigate to `ItemDetailScreen` with item ID parameter
+- [x] Test navigation works
 
 ---
 

@@ -11,6 +11,7 @@ import com.coreo.listbox.screens.HomeScreen
 import com.coreo.listbox.screens.ItemDetailScreen
 import com.coreo.listbox.screens.ListDetailScreen
 import com.coreo.listbox.viewmodel.HomeViewModel
+import com.coreo.listbox.viewmodel.ListDetailViewModel
 import com.coreo.listbox.di.ServiceLocator
 
 @Composable
@@ -48,6 +49,10 @@ actual fun ListBoxNavHost() {
         
         composable(Routes.LIST_DETAIL) { backStackEntry ->
             val listId = backStackEntry.arguments?.getString("listId") ?: ""
+            val listDetailViewModel = remember { ListDetailViewModel(repository, listId) }
+            val items = listDetailViewModel.items.collectAsState().value
+            val list = listDetailViewModel.list.collectAsState().value
+            
             ListDetailScreen(
                 listId = listId,
                 onItemSelect = { itemId ->
@@ -55,7 +60,9 @@ actual fun ListBoxNavHost() {
                 },
                 onBackClick = {
                     navController.navigateUp()
-                }
+                },
+                items = items,
+                listTitle = list?.title ?: "List"
             )
         }
         
