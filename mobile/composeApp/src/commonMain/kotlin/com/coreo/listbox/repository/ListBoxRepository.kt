@@ -93,4 +93,31 @@ class ListBoxRepository(private val database: ListBoxDatabase) {
             .asFlow()
             .map { it.executeAsList() }
     }
+
+    /**
+     * Get a specific item by ID as a reactive Flow
+     */
+    fun getItemById(itemId: String): Flow<ItemEntity?> {
+        return database.itemEntityQueries.getItemById(itemId)
+            .asFlow()
+            .map { it.executeAsOneOrNull() }
+    }
+
+    /**
+     * Update an item's title and description
+     */
+    suspend fun updateItem(itemId: String, title: String, description: String?) {
+        database.itemEntityQueries.updateItem(
+            title = title,
+            description = description,
+            id = itemId
+        )
+    }
+
+    /**
+     * Delete a single item by ID
+     */
+    suspend fun deleteItem(itemId: String) {
+        database.itemEntityQueries.deleteItem(id = itemId)
+    }
 }

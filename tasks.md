@@ -112,9 +112,9 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 
 - [x] Create `ItemEntity` data class
 - [x] Implement `getItemsForList(listId: String): Flow<List<ItemEntity>>`
-- [ ] Implement `createItem(listId: String, title: String, description: String): ItemEntity`
-- [ ] Implement `updateItem(itemId: String, title: String, description: String)`
-- [ ] Implement `deleteItem(itemId: String)`
+- [x] Implement `createItem(listId: String, title: String, description: String): ItemEntity`
+- [x] Implement `updateItem(itemId: String, title: String, description: String)`
+- [x] Implement `deleteItem(itemId: String)`
 - [ ] Unit test item repository methods
 
 ### 3.3 Build List Detail Screen Basic Structure [LIST-14]
