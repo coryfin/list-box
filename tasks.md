@@ -125,14 +125,14 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [x] Fetch and display list items in a LazyColumn
 - [x] Create item composable for list items
 
-### 3.4 Implement Overflow Menu & Delete List [LIST-13]
+### 3.4 Implement Overflow Menu & Delete List [LIST-13] ✅ COMPLETED
 
-- [ ] Add overflow menu icon (three-dot) to top app bar
-- [ ] Create dropdown menu with "Delete" option
-- [ ] Show confirmation dialog on "Delete" tap
-- [ ] Call repository `deleteList()` on confirmation
-- [ ] Navigate back to Home screen after deletion
-- [ ] Test cancel dismisses dialog
+- [x] Add overflow menu icon (three-dot) to top app bar
+- [x] Create dropdown menu with "Delete" option
+- [x] Show confirmation dialog on "Delete" tap
+- [x] Call repository `deleteList()` on confirmation
+- [x] Navigate back to Home screen after deletion
+- [x] Test cancel dismisses dialog
 
 ### 3.5 Implement Empty State (No Items) [LIST-15] ✅ COMPLETED
 

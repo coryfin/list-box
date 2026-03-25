@@ -63,6 +63,9 @@ actual fun ListBoxNavHost() {
                 onBackClick = {
                     currentState = NavigationState.Home
                 },
+                onDeleteList = {
+                    listDetailViewModel.deleteList()
+                },
                 items = items,
                 listTitle = list?.title ?: "List"
             )
