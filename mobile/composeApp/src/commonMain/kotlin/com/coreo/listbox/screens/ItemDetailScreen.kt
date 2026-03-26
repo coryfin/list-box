@@ -28,6 +28,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,8 +36,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.coreo.listbox.database.ItemEntity
 
@@ -56,18 +61,28 @@ fun ItemDetailScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showDiscardDialog by remember { mutableStateOf(false) }
     // Drafts are keyed on item id so they reset on first load (null → actual id)
-    var draftTitle by remember(item?.id) { mutableStateOf(item?.title ?: "") }
+    var draftTitle by remember(item?.id) {
+        val text = item?.title ?: ""
+        mutableStateOf(TextFieldValue(text = text, selection = TextRange(text.length)))
+    }
     var draftDescription by remember(item?.id) { mutableStateOf(item?.description ?: "") }
+    val titleFocusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(isEditMode) {
+        if (isEditMode) {
+            titleFocusRequester.requestFocus()
+        }
+    }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
     val hasUnsavedChanges = isEditMode &&
-        (draftTitle != (item?.title ?: "") || draftDescription != (item?.description ?: ""))
+        (draftTitle.text != (item?.title ?: "") || draftDescription != (item?.description ?: ""))
 
     BackHandler(enabled = isEditMode) {
         if (hasUnsavedChanges) {
             showDiscardDialog = true
         } else {
-            draftTitle = item?.title ?: ""
+            draftTitle = TextFieldValue(item?.title ?: "")
             draftDescription = item?.description ?: ""
             onExitEditMode()
         }
@@ -81,7 +96,7 @@ fun ItemDetailScreen(
             confirmButton = {
                 TextButton(onClick = {
                     showDiscardDialog = false
-                    draftTitle = item?.title ?: ""
+                    draftTitle = TextFieldValue(item?.title ?: "")
                     draftDescription = item?.description ?: ""
                     onExitEditMode()
                 }) {
@@ -141,11 +156,11 @@ fun ItemDetailScreen(
                                 color = MaterialTheme.colorScheme.onSurface
                             ),
                             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().focusRequester(titleFocusRequester),
                             singleLine = true,
                             decorationBox = { innerTextField ->
                                 Box {
-                                    if (draftTitle.isEmpty()) {
+                                    if (draftTitle.text.isEmpty()) {
                                         Text(
                                             text = "Title",
                                             style = MaterialTheme.typography.headlineSmall.copy(
@@ -170,7 +185,7 @@ fun ItemDetailScreen(
                             if (hasUnsavedChanges) {
                                 showDiscardDialog = true
                             } else {
-                                draftTitle = item?.title ?: ""
+                                draftTitle = TextFieldValue(item?.title ?: "")
                                 draftDescription = item?.description ?: ""
                                 onExitEditMode()
                             }
@@ -192,8 +207,8 @@ fun ItemDetailScreen(
                 actions = {
                     if (isEditMode) {
                         IconButton(
-                            onClick = { onSaveItem(draftTitle, draftDescription.ifBlank { null }) },
-                            enabled = draftTitle.isNotBlank()
+                            onClick = { onSaveItem(draftTitle.text, draftDescription.ifBlank { null }) },
+                            enabled = draftTitle.text.isNotBlank()
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Check,
