@@ -5,8 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.coreo.listbox.database.ItemEntity
 import com.coreo.listbox.database.ListEntity
 import com.coreo.listbox.repository.ListBoxRepository
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -20,7 +22,18 @@ class ListDetailViewModel(
     
     val items: StateFlow<List<ItemEntity>> = repository.getItemsForList(listId)
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-    
+
+    private val _isMultiSelectMode = MutableStateFlow(false)
+    val isMultiSelectMode: StateFlow<Boolean> = _isMultiSelectMode.asStateFlow()
+
+    private val _selectedItems = MutableStateFlow<Set<String>>(emptySet())
+    val selectedItems: StateFlow<Set<String>> = _selectedItems.asStateFlow()
+
+    fun enterMultiSelect(itemId: String) {
+        _selectedItems.value = setOf(itemId)
+        _isMultiSelectMode.value = true
+    }
+
     fun createItem(title: String, description: String? = null) {
         viewModelScope.launch {
             repository.createItem(listId, title, description)

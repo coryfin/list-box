@@ -281,12 +281,12 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 
 ## Phase 7: List Detail Screen - Multi-Select & Deletion
 
-### 7.1 Implement Long-Press Multi-Select Entry [LIST-39]
+### 7.1 Implement Long-Press Multi-Select Entry [LIST-42] ✅ COMPLETED
 
-- [ ] Add `onLongClick` handler to item tiles
-- [ ] Enter multi-select state with first item selected
-- [ ] Track selected items in a `Set<String>` in ViewModel
-- [ ] Test long-press activates multi-select
+- [x] Add `onLongClick` handler to item tiles
+- [x] Enter multi-select state with first item selected
+- [x] Track selected items in a `Set<String>` in ViewModel
+- [x] Test long-press activates multi-select
 
 ### 7.2 Implement Multi-Select Tap to Toggle [LIST-40]
 

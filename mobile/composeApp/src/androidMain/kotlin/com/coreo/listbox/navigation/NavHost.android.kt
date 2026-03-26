@@ -53,6 +53,8 @@ actual fun ListBoxNavHost() {
             val listDetailViewModel = remember { ListDetailViewModel(repository, listId) }
             val items = listDetailViewModel.items.collectAsState().value
             val list = listDetailViewModel.list.collectAsState().value
+            val isMultiSelectMode = listDetailViewModel.isMultiSelectMode.collectAsState().value
+            val selectedItems = listDetailViewModel.selectedItems.collectAsState().value
 
             ListDetailScreen(
                 listId = listId,
@@ -71,8 +73,13 @@ actual fun ListBoxNavHost() {
                 onSaveItem = { title, description ->
                     listDetailViewModel.createItem(title, description)
                 },
+                onItemLongClick = { itemId ->
+                    listDetailViewModel.enterMultiSelect(itemId)
+                },
                 items = items,
-                listTitle = list?.title ?: "List"
+                listTitle = list?.title ?: "List",
+                isMultiSelectMode = isMultiSelectMode,
+                selectedItems = selectedItems
             )
         }
         

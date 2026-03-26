@@ -1,5 +1,7 @@
 package com.coreo.listbox.screens
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,6 +12,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,8 +49,11 @@ fun ListDetailScreen(
     onDeleteList: () -> Unit,
     onRenameList: (String) -> Unit = {},
     onSaveItem: (title: String, description: String) -> Unit = { _, _ -> },
+    onItemLongClick: (String) -> Unit = {},
     items: List<ItemEntity> = emptyList(),
-    listTitle: String = "List"
+    listTitle: String = "List",
+    isMultiSelectMode: Boolean = false,
+    selectedItems: Set<String> = emptySet()
 ) {
     var showOverflowMenu by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -174,7 +180,9 @@ fun ListDetailScreen(
                 items(items) { item ->
                     ItemCard(
                         item = item,
-                        onClick = { onItemSelect(item.id) }
+                        isSelected = selectedItems.contains(item.id),
+                        onClick = { onItemSelect(item.id) },
+                        onLongClick = { onItemLongClick(item.id) }
                     )
                 }
             }
@@ -182,17 +190,29 @@ fun ListDetailScreen(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ItemCard(
     item: ItemEntity,
     onClick: () -> Unit,
+    onLongClick: () -> Unit,
+    isSelected: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier
             .fillMaxSize()
-            .padding(vertical = 8.dp),
-        onClick = onClick
+            .padding(vertical = 8.dp)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            ),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected)
+                MaterialTheme.colorScheme.primaryContainer
+            else
+                MaterialTheme.colorScheme.surface
+        )
     ) {
         Text(
             text = item.title,
