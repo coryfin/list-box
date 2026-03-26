@@ -274,11 +274,11 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [x] Disable Save button if title is empty
 - [x] Show validation errors as Material error messages
 
-### 6.5 Implement Keyboard Navigation [LIST-29b]
+### 6.5 Implement Keyboard Navigation [LIST-34] ✅ COMPLETED
 
-- [ ] Pressing Enter in title field moves focus to description
-- [ ] Pressing Enter in description creates line breaks
-- [ ] Test keyboard navigation on both platforms
+- [x] Pressing Enter in title field moves focus to description
+- [x] Pressing Enter in description creates line breaks
+- [x] Test keyboard navigation on both platforms
 
 ### 6.6 Implement Bottom Sheet Save & Dismissal [LIST-30]
 

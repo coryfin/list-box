@@ -20,8 +20,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,6 +46,7 @@ fun AddItemBottomSheet(
 
     val canSave = title.isNotBlank() && !titleLengthError && !descriptionLengthError
 
+    val descriptionFocusRequester = remember { FocusRequester() }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     ModalBottomSheet(
@@ -64,6 +70,8 @@ fun AddItemBottomSheet(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 isError = titleError,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardActions = KeyboardActions(onNext = { descriptionFocusRequester.requestFocus() }),
                 supportingText = {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -87,7 +95,9 @@ fun AddItemBottomSheet(
                 value = description,
                 onValueChange = { description = it },
                 label = { Text("Description") },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(descriptionFocusRequester),
                 minLines = 1,
                 maxLines = Int.MAX_VALUE,
                 isError = descriptionLengthError,
