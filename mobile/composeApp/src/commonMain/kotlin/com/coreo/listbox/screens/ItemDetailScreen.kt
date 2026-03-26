@@ -1,5 +1,6 @@
 package com.coreo.listbox.screens
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -19,8 +20,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -31,13 +32,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import com.coreo.listbox.database.ItemEntity
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun ItemDetailScreen(
     itemId: String,
@@ -55,6 +58,12 @@ fun ItemDetailScreen(
     var draftTitle by remember(item?.id) { mutableStateOf(item?.title ?: "") }
     var draftDescription by remember(item?.id) { mutableStateOf(item?.description ?: "") }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+
+    BackHandler(enabled = isEditMode) {
+        draftTitle = item?.title ?: ""
+        draftDescription = item?.description ?: ""
+        onExitEditMode()
+    }
 
     if (showDeleteDialog) {
         AlertDialog(
@@ -102,7 +111,20 @@ fun ItemDetailScreen(
                             ),
                             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                             modifier = Modifier.fillMaxWidth(),
-                            singleLine = true
+                            singleLine = true,
+                            decorationBox = { innerTextField ->
+                                Box {
+                                    if (draftTitle.isEmpty()) {
+                                        Text(
+                                            text = "Title",
+                                            style = MaterialTheme.typography.headlineSmall.copy(
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        )
+                                    }
+                                    innerTextField()
+                                }
+                            }
                         )
                     } else {
                         Text(
@@ -180,22 +202,34 @@ fun ItemDetailScreen(
                     .fillMaxSize()
                     .padding(paddingValues)
                     .padding(horizontal = 16.dp, vertical = 12.dp)
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(rememberScrollState()),
+                decorationBox = { innerTextField ->
+                    Box {
+                        if (draftDescription.isEmpty()) {
+                            Text(
+                                text = "Add a description\u2026",
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            )
+                        }
+                        innerTextField()
+                    }
+                }
             )
         } else {
             val description = item?.description
-            if (!description.isNullOrBlank()) {
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
-                        .verticalScroll(rememberScrollState())
-                )
-            }
+            Text(
+                text = if (!description.isNullOrBlank()) description else "No description",
+                style = MaterialTheme.typography.bodyLarge,
+                color = if (!description.isNullOrBlank()) MaterialTheme.colorScheme.onSurface
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .verticalScroll(rememberScrollState())
+            )
         }
     }
 }
