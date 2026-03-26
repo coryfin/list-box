@@ -158,21 +158,21 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [x] Disable Save button when title field is empty
 - [x] Enforce max 100 character limit with character counter
 - [x] Call repository `updateListTitle()` on Save confirmation
-- [ ] Test dialog pre-fills with current title
-- [ ] Test Cancel / tap-outside dismisses without saving
+- [x] Test dialog pre-fills with current title
+- [x] Test Cancel / tap-outside dismisses without saving
 
-### 4.2 Implement Scroll Collapse/Expand Behavior [LIST-19]
+### 4.2 Implement Scroll Collapse/Expand Behavior [LIST-19] ✅ COMPLETED
 
-- [ ] Collapse top app bar on scroll down (using Material API)
-- [ ] Expand top app bar on scroll up (using Material API)
-- [ ] Test collapse/expand works smoothly on scroll
+- [x] Collapse top app bar on scroll down (using Material API)
+- [x] Expand top app bar on scroll up (using Material API)
+- [x] Test collapse/expand works smoothly on scroll
 
-### 4.5 Implement Validation for Title Edit [LIST-20] 🚧 IN PROGRESS
+### 4.5 Implement Validation for Title Edit [LIST-20] ✅ COMPLETED
 
-- [ ] Enforce max 100 character limit
-- [ ] Show character counter during edit
-- [ ] Prevent Save if title is empty
-- [ ] Test validation feedback
+- [x] Enforce max 100 character limit
+- [x] Show character counter during edit
+- [x] Prevent Save if title is empty
+- [x] Test validation feedback
 
 ---
 
@@ -185,20 +185,20 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [x] Display item description in body
 - [x] Fetch item from repository using item ID parameter
 
-### 5.2 Implement Edit Mode via FAB [LIST-26] 🚧 IN PROGRESS
+### 5.2 Implement Edit Mode via FAB [LIST-26] ✅ COMPLETED
 
-- [ ] Add FAB to bottom-right corner of Item Detail screen (read-only state)
-- [ ] Track edit mode state in ViewModel
-- [ ] Tapping FAB activates Edit Mode: swap both title Text → TextField and description Text → TextField simultaneously
-- [ ] Hide FAB while in Edit Mode
-- [ ] Implement component swapping with matching layout dimensions to ensure zero layout shift
-- [ ] Show Save button as trailing action in top app bar during Edit Mode (replaces overflow menu)
-- [ ] Show Close icon button as navigation icon in top app bar during Edit Mode (replaces Back button)
-- [ ] Tapping Close discards edits and returns to read-only state (no confirmation needed)
-- [ ] Call repository `updateItem()` on Save
-- [ ] Return to read-only state (restore FAB, restore overflow menu, restore Back button) after Save
-- [ ] Test FAB activates both fields at once
-- [ ] Test zero layout shift on transition
+- [x] Add FAB to bottom-right corner of Item Detail screen (read-only state)
+- [x] Track edit mode state in ViewModel
+- [x] Tapping FAB activates Edit Mode: swap both title Text → TextField and description Text → TextField simultaneously
+- [x] Hide FAB while in Edit Mode
+- [x] Implement component swapping with matching layout dimensions to ensure zero layout shift
+- [x] Show Save button as trailing action in top app bar during Edit Mode (replaces overflow menu)
+- [x] Show Close icon button as navigation icon in top app bar during Edit Mode (replaces Back button)
+- [x] Tapping Close discards edits and returns to read-only state (no confirmation needed)
+- [x] Call repository `updateItem()` on Save
+- [x] Return to read-only state (restore FAB, restore overflow menu, restore Back button) after Save
+- [x] Test FAB activates both fields at once
+- [x] Test zero layout shift on transition
 
 ### 5.3 Implement Overflow Menu & Delete Item [LIST-27] ✅ COMPLETED
 
@@ -212,7 +212,6 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 
 - [ ] Track draft state for title and description separately
 - [ ] Show confirmation on back press if either field is edited
-- [ ] Show confirmation on navigation if either field is edited
 - [ ] Test confirmation logic
 
 ### 5.5 Implement Validation
