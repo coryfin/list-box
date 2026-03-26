@@ -63,7 +63,7 @@ fun HomeScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Lists",
+                        text = "ListBox",
                         style = MaterialTheme.typography.headlineSmall
                     )
                 }
