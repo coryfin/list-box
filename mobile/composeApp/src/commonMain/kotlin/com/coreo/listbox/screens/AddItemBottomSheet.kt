@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
@@ -31,6 +32,14 @@ fun AddItemBottomSheet(
 ) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
+    var titleTouched by remember { mutableStateOf(false) }
+
+    val titleBlankError = titleTouched && title.isBlank()
+    val titleLengthError = title.length > 100
+    val titleError = titleBlankError || titleLengthError
+    val descriptionLengthError = description.length > 5000
+
+    val canSave = title.isNotBlank() && !titleLengthError && !descriptionLengthError
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -50,19 +59,55 @@ fun AddItemBottomSheet(
             Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
                 value = title,
-                onValueChange = { if (it.length <= 100) title = it },
+                onValueChange = { title = it; titleTouched = true },
                 label = { Text("Title") },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                isError = titleError,
+                supportingText = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        when {
+                            titleBlankError -> Text("Title is required", color = MaterialTheme.colorScheme.error)
+                            titleLengthError -> Text("Title must be 100 characters or less", color = MaterialTheme.colorScheme.error)
+                            else -> Spacer(Modifier.weight(1f))
+                        }
+                        Text(
+                            text = "${title.length}/100",
+                            color = if (titleLengthError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             )
             Spacer(modifier = Modifier.height(12.dp))
             OutlinedTextField(
                 value = description,
-                onValueChange = { if (it.length <= 5000) description = it },
+                onValueChange = { description = it },
                 label = { Text("Description") },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 1,
-                maxLines = Int.MAX_VALUE
+                maxLines = Int.MAX_VALUE,
+                isError = descriptionLengthError,
+                supportingText = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (descriptionLengthError) {
+                            Text("Description must be 5000 characters or less", color = MaterialTheme.colorScheme.error)
+                        } else {
+                            Spacer(Modifier.weight(1f))
+                        }
+                        Text(
+                            text = "${description.length}/5000",
+                            color = if (descriptionLengthError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             )
             Spacer(modifier = Modifier.height(16.dp))
             Row(
@@ -71,10 +116,13 @@ fun AddItemBottomSheet(
             ) {
                 Button(
                     onClick = {
-                        onSave(title.trim(), description.trim())
-                        onDismiss()
+                        titleTouched = true
+                        if (canSave) {
+                            onSave(title.trim(), description.trim())
+                            onDismiss()
+                        }
                     },
-                    enabled = title.isNotBlank()
+                    enabled = canSave
                 ) {
                     Text("Save")
                 }

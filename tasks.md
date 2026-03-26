@@ -6,14 +6,14 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 
 ## Phase 1: Project Setup & Core Infrastructure
 
-### 1.1 Initialize Compose Multiplatform Project Structure [LIST-1]
+### 1.1 Initialize Compose Multiplatform Project Structure [LIST-1] ✅ COMPLETED
 
 - [x] Create base Gradle multiplatform project with Compose CMP dependencies
 - [x] Set up iOS and Android target configurations
 - [x] Configure Material 3 theming for both platforms
 - [x] Test basic "Hello World" app on both platforms
 
-### 1.2 Set Up SQLDelight Database Layer [LIST-2]
+### 1.2 Set Up SQLDelight Database Layer [LIST-2] ✅ COMPLETED
 
 - [x] Create SQLDelight schema file with `listEntity` table
 - [x] Create SQLDelight schema file with `itemEntity` table
@@ -21,7 +21,7 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [x] Generate SQLDelight database code
 - [x] Test database initialization on both platforms
 
-### 1.3 Set Up Dependency Injection (kotlin-inject) [LIST-3]
+### 1.3 Set Up Dependency Injection (kotlin-inject) [LIST-3] ✅ COMPLETED
 
 - [x] Create `DataComponent` with `@Component` and `@Singleton` annotations
 - [x] Implement `provideDatabase()` provider for `ListBoxDatabase`
@@ -85,14 +85,14 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [x] Navigate to `ListDetailScreen` with list ID parameter
 - [x] Test navigation works on both platforms
 
-### 2.7 Implement Populated State (Hide Templates) [LIST-14] [In Progress]
+### 2.7 Implement Populated State (Hide Templates) [LIST-14] ✅ COMPLETED
 
 - [x] Show FAB when list count > 0
 - [x] Hide template buttons when list count > 0
 - [x] Show template buttons again when all lists are deleted
 - [x] Test state transitions
 
-### 2.8 Implement FAB for "Add List" [LIST-10] [In Progress]
+### 2.8 Implement FAB for "Add List" [LIST-10] ✅ COMPLETED
 
 - [x] Add floating action button to bottom-right of screen
 - [x] Trigger `CreateListDialog` on FAB tap
@@ -102,7 +102,7 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 
 ## Phase 3: List Detail Screen - Basic Setup
 
-### 3.1 Implement Database Queries for Items (SQLDelight) [LIST-11a]
+### 3.1 Implement Database Queries for Items (SQLDelight) [LIST-11a] ✅ COMPLETED
 
 - [x] Write query to insert/update/delete `itemEntity` records
 - [x] Write query to fetch all items for a list sorted by `orderIndex`
@@ -117,7 +117,7 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [x] Implement `deleteItem(itemId: String)`
 - [ ] Unit test item repository methods
 
-### 3.3 Build List Detail Screen Basic Structure [LIST-14]
+### 3.3 Build List Detail Screen Basic Structure [LIST-14] ✅ COMPLETED
 
 - [x] Create `ListDetailScreen` composable
 - [x] Implement Material 3 Medium Top App Bar
@@ -141,7 +141,7 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [x] Hide when items are added
 - [x] Test displays when list has 0 items
 
-### 3.6 Implement Basic Item Tap Navigation [LIST-16]
+### 3.6 Implement Basic Item Tap Navigation [LIST-16] ✅ COMPLETED
 
 - [x] Add click handler to item tiles
 - [x] Navigate to `ItemDetailScreen` with item ID parameter
@@ -193,7 +193,7 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 
 ## Phase 5: Item Detail Screen
 
-### 5.1 Build Item Detail Screen Basic Structure [LIST-24] [In Progress]
+### 5.1 Build Item Detail Screen Basic Structure [LIST-24] ✅ COMPLETED
 
 - [x] Create `ItemDetailScreen` composable
 - [x] Implement Material 3 Medium Top App Bar with item title
@@ -244,14 +244,14 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 
 ## Phase 6: List Detail Screen - Add Item (FAB & Bottom Sheet)
 
-### 6.1 Implement Add Item FAB [LIST-33] [In Progress]
+### 6.1 Implement Add Item FAB [LIST-33] ✅ COMPLETED
 
 - [x] Add floating action button to List Detail screen
 - [x] Position in bottom-right corner
 - [x] Open `AddItemBottomSheet` on tap
 - [x] Test FAB appears on all states
 
-### 6.2 Build Add Item Bottom Sheet Structure [LIST-28] [In Progress]
+### 6.2 Build Add Item Bottom Sheet Structure [LIST-28] ✅ COMPLETED
 
 - [x] Create `AddItemBottomSheet` composable
 - [x] Implement ModalBottomSheetLayout
@@ -266,13 +266,13 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [x] Ensure smooth, natural expansion behavior
 - [x] Test with multi-line text
 
-### 6.4 Implement Validation in Bottom Sheet [LIST-29a]
+### 6.4 Implement Validation in Bottom Sheet [LIST-32] ✅ COMPLETED
 
-- [ ] Show "Title is required" error if title is empty
-- [ ] Enforce max 100 chars for title with counter
-- [ ] Enforce max 5000 chars for description with counter
-- [ ] Disable Save button if title is empty
-- [ ] Show validation errors as Material error messages
+- [x] Show "Title is required" error if title is empty
+- [x] Enforce max 100 chars for title with counter
+- [x] Enforce max 5000 chars for description with counter
+- [x] Disable Save button if title is empty
+- [x] Show validation errors as Material error messages
 
 ### 6.5 Implement Keyboard Navigation [LIST-29b]
 
