@@ -288,12 +288,12 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [x] Track selected items in a `Set<String>` in ViewModel
 - [x] Test long-press activates multi-select
 
-### 7.2 Implement Multi-Select Tap to Toggle [LIST-40]
+### 7.2 Implement Multi-Select Tap to Toggle [LIST-38] ✅ COMPLETED
 
-- [ ] While in multi-select mode, tapping items toggles selection
-- [ ] Update `Set<String>` in ViewModel
-- [ ] Visual feedback (highlight/checkbox) for selected items
-- [ ] Test toggling selection works
+- [x] While in multi-select mode, tapping items toggles selection
+- [x] Update `Set<String>` in ViewModel
+- [x] Visual feedback (highlight/checkbox) for selected items
+- [x] Test toggling selection works
 
 ### 7.3 Implement Multi-Select Top App Bar [LIST-41]
 

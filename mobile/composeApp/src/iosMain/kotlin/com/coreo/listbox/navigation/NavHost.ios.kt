@@ -61,7 +61,11 @@ actual fun ListBoxNavHost() {
             ListDetailScreen(
                 listId = listId,
                 onItemSelect = { itemId ->
-                    currentState = NavigationState.ItemDetail(itemId = itemId, listId = listId)
+                    if (isMultiSelectMode) {
+                        listDetailViewModel.toggleItemSelection(itemId)
+                    } else {
+                        currentState = NavigationState.ItemDetail(itemId = itemId, listId = listId)
+                    }
                 },
                 onBackClick = {
                     currentState = NavigationState.Home
@@ -76,7 +80,11 @@ actual fun ListBoxNavHost() {
                     listDetailViewModel.createItem(title, description)
                 },
                 onItemLongClick = { itemId ->
-                    listDetailViewModel.enterMultiSelect(itemId)
+                    if (isMultiSelectMode) {
+                        listDetailViewModel.toggleItemSelection(itemId)
+                    } else {
+                        listDetailViewModel.enterMultiSelect(itemId)
+                    }
                 },
                 items = items,
                 listTitle = list?.title ?: "List",

@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 
 class ListDetailViewModel(
@@ -32,6 +33,15 @@ class ListDetailViewModel(
     fun enterMultiSelect(itemId: String) {
         _selectedItems.value = setOf(itemId)
         _isMultiSelectMode.value = true
+    }
+
+    fun toggleItemSelection(itemId: String) {
+        val updated = _selectedItems.updateAndGet { current ->
+            if (current.contains(itemId)) current - itemId else current + itemId
+        }
+        if (updated.isEmpty()) {
+            _isMultiSelectMode.value = false
+        }
     }
 
     fun createItem(title: String, description: String? = null) {
