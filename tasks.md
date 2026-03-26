@@ -185,7 +185,7 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [x] Display item description in body
 - [x] Fetch item from repository using item ID parameter
 
-### 5.2 Implement Edit Mode via FAB [LIST-26]
+### 5.2 Implement Edit Mode via FAB [LIST-26] 🚧 IN PROGRESS
 
 - [ ] Add FAB to bottom-right corner of Item Detail screen (read-only state)
 - [ ] Track edit mode state in ViewModel

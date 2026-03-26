@@ -80,12 +80,17 @@ actual fun ListBoxNavHost() {
             val itemId = backStackEntry.arguments?.getString("itemId") ?: ""
             val itemDetailViewModel = remember { ItemDetailViewModel(repository, itemId) }
             val item = itemDetailViewModel.item.collectAsState().value
+            val isEditMode = itemDetailViewModel.isEditMode.collectAsState().value
 
             ItemDetailScreen(
                 itemId = itemId,
                 onBackClick = { navController.navigateUp() },
                 onDeleteItem = { itemDetailViewModel.deleteItem() },
-                item = item
+                onEnterEditMode = { itemDetailViewModel.enterEditMode() },
+                onExitEditMode = { itemDetailViewModel.exitEditMode() },
+                onSaveItem = { title, description -> itemDetailViewModel.saveItem(title, description) },
+                item = item,
+                isEditMode = isEditMode
             )
         }
     }

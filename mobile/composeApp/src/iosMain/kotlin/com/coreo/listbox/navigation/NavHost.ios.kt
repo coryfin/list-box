@@ -82,13 +82,18 @@ actual fun ListBoxNavHost() {
             val itemId = (currentState as NavigationState.ItemDetail).itemId
             val itemDetailViewModel = remember { ItemDetailViewModel(repository, itemId) }
             val item = itemDetailViewModel.item.collectAsState().value
+            val isEditMode = itemDetailViewModel.isEditMode.collectAsState().value
 
             val listId = (currentState as NavigationState.ItemDetail).listId
             ItemDetailScreen(
                 itemId = itemId,
                 onBackClick = { currentState = NavigationState.ListDetail(listId) },
                 onDeleteItem = { itemDetailViewModel.deleteItem() },
-                item = item
+                onEnterEditMode = { itemDetailViewModel.enterEditMode() },
+                onExitEditMode = { itemDetailViewModel.exitEditMode() },
+                onSaveItem = { title, description -> itemDetailViewModel.saveItem(title, description) },
+                item = item,
+                isEditMode = isEditMode
             )
         }
     }
