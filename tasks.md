@@ -288,12 +288,12 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [x] Show confirmation dialog if user dismisses with unsaved text
 - [x] Test Save and Cancel flows
 
-### 6.7 Implement Unsaved Changes in Bottom Sheet [LIST-31]
+### 6.7 Implement Unsaved Changes in Bottom Sheet [LIST-35] ✅ COMPLETED
 
-- [ ] Track `isDirty` state for title and description
-- [ ] Show confirmation dialog on dismiss if text was entered
-- [ ] Allow user to "Save" or "Discard" draft
-- [ ] Test confirmation appears only when needed
+- [x] Track `isDirty` state for title and description
+- [x] Show confirmation dialog on dismiss if text was entered
+- [x] Allow user to "Discard" draft or "Keep editing"
+- [x] Test confirmation appears only when needed
 
 ---
 
