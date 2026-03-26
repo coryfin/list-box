@@ -161,10 +161,9 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 
 ### 4.2 Implement Scroll Collapse/Expand Behavior [LIST-22]
 
-- [ ] Add scroll behavior listener to LazyColumn
-- [ ] Collapse top app bar on scroll down
-- [ ] Expand top app bar on scroll up
-- [ ] Test collapse/expand works smoothly
+- [ ] Collapse top app bar on scroll down (using Material API)
+- [ ] Expand top app bar on scroll up (using Material API)
+- [ ] Test collapse/expand works smoothly on scroll
 
 ### 4.3 Implement Save Action in Edit Mode [LIST-23]
 
