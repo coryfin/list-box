@@ -54,15 +54,46 @@ fun ItemDetailScreen(
 ) {
     var showOverflowMenu by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showDiscardDialog by remember { mutableStateOf(false) }
     // Drafts are keyed on item id so they reset on first load (null → actual id)
     var draftTitle by remember(item?.id) { mutableStateOf(item?.title ?: "") }
     var draftDescription by remember(item?.id) { mutableStateOf(item?.description ?: "") }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
+    val hasUnsavedChanges = isEditMode &&
+        (draftTitle != (item?.title ?: "") || draftDescription != (item?.description ?: ""))
+
     BackHandler(enabled = isEditMode) {
-        draftTitle = item?.title ?: ""
-        draftDescription = item?.description ?: ""
-        onExitEditMode()
+        if (hasUnsavedChanges) {
+            showDiscardDialog = true
+        } else {
+            draftTitle = item?.title ?: ""
+            draftDescription = item?.description ?: ""
+            onExitEditMode()
+        }
+    }
+
+    if (showDiscardDialog) {
+        AlertDialog(
+            onDismissRequest = { showDiscardDialog = false },
+            title = { Text("Discard changes?") },
+            text = { Text("Your edits will be lost.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDiscardDialog = false
+                    draftTitle = item?.title ?: ""
+                    draftDescription = item?.description ?: ""
+                    onExitEditMode()
+                }) {
+                    Text("Discard")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDiscardDialog = false }) {
+                    Text("Keep Editing")
+                }
+            }
+        )
     }
 
     if (showDeleteDialog) {
@@ -136,9 +167,13 @@ fun ItemDetailScreen(
                 navigationIcon = {
                     if (isEditMode) {
                         IconButton(onClick = {
-                            draftTitle = item?.title ?: ""
-                            draftDescription = item?.description ?: ""
-                            onExitEditMode()
+                            if (hasUnsavedChanges) {
+                                showDiscardDialog = true
+                            } else {
+                                draftTitle = item?.title ?: ""
+                                draftDescription = item?.description ?: ""
+                                onExitEditMode()
+                            }
                         }) {
                             Icon(
                                 imageVector = Icons.Default.Close,

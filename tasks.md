@@ -208,11 +208,11 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [x] Call repository `deleteItem()` on confirmation
 - [x] Navigate back to ListDetailScreen after deletion
 
-### 5.4 Implement Unsaved Changes Confirmation [LIST-36]
+### 5.4 Implement Unsaved Changes Confirmation [LIST-36] ✅ COMPLETED
 
-- [ ] Track draft state for title and description separately
-- [ ] Show confirmation on back press if either field is edited
-- [ ] Test confirmation logic
+- [x] Track draft state for title and description separately
+- [x] Show confirmation on back press if either field is edited
+- [x] Test confirmation logic
 
 ### 5.5 Implement Validation
 
