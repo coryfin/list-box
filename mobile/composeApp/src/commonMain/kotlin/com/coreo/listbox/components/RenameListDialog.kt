@@ -18,20 +18,20 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun CreateListDialog(
+fun RenameListDialog(
+    currentTitle: String,
     onDismiss: () -> Unit,
-    onCreate: (String) -> Unit = {}
+    onRename: (String) -> Unit = {}
 ) {
-    var listTitle by remember { mutableStateOf("") }
-    var isError by remember { mutableStateOf(false) }
-    
+    var listTitle by remember { mutableStateOf(currentTitle) }
+
     val maxChars = 100
     val isValid = listTitle.trim().isNotEmpty() && listTitle.length <= maxChars
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("New List")
+            Text("Rename List")
         },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -40,7 +40,6 @@ fun CreateListDialog(
                     onValueChange = { newValue ->
                         if (newValue.length <= maxChars) {
                             listTitle = newValue
-                            isError = false
                         }
                     },
                     placeholder = { Text("List title") },
@@ -48,7 +47,6 @@ fun CreateListDialog(
                         .fillMaxWidth()
                         .padding(bottom = 8.dp),
                     singleLine = true,
-                    isError = isError,
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Sentences
                     )
@@ -57,27 +55,19 @@ fun CreateListDialog(
                     text = "${listTitle.length}/$maxChars",
                     modifier = Modifier.padding(top = 4.dp)
                 )
-                if (isError) {
-                    Text(
-                        text = "List title is required",
-                        color = androidx.compose.material3.MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
             }
         },
         confirmButton = {
             TextButton(
                 onClick = {
                     if (isValid) {
-                        onCreate(listTitle.trim())
+                        onRename(listTitle.trim())
                         onDismiss()
-                    } else {
-                        isError = true
                     }
-                }
+                },
+                enabled = isValid
             ) {
-                Text("Create")
+                Text("Save")
             }
         },
         dismissButton = {

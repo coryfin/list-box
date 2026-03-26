@@ -151,13 +151,13 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 
 ## Phase 4: List Detail Screen - Rename & Scroll
 
-### 4.1 Implement Rename List Dialog [LIST-22] ← IN PROGRESS
+### 4.1 Implement Rename List Dialog [LIST-22] ✅ COMPLETED
 
-- [ ] Add "Rename" menu item to the overflow menu (above "Delete")
-- [ ] Create `RenameListDialog` composable with a pre-filled `TextField`
-- [ ] Disable Save button when title field is empty
-- [ ] Enforce max 100 character limit with character counter
-- [ ] Call repository `updateListTitle()` on Save confirmation
+- [x] Add "Rename" menu item to the overflow menu (above "Delete")
+- [x] Create `RenameListDialog` composable with a pre-filled `TextField`
+- [x] Disable Save button when title field is empty
+- [x] Enforce max 100 character limit with character counter
+- [x] Call repository `updateListTitle()` on Save confirmation
 - [ ] Test dialog pre-fills with current title
 - [ ] Test Cancel / tap-outside dismisses without saving
 

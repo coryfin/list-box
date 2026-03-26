@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
+import com.coreo.listbox.components.RenameListDialog
 import com.coreo.listbox.database.ItemEntity
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,17 +44,27 @@ fun ListDetailScreen(
     onItemSelect: (String) -> Unit,
     onBackClick: () -> Unit,
     onDeleteList: () -> Unit,
+    onRenameList: (String) -> Unit = {},
     onSaveItem: (title: String, description: String) -> Unit = { _, _ -> },
     items: List<ItemEntity> = emptyList(),
     listTitle: String = "List"
 ) {
     var showOverflowMenu by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showRenameDialog by remember { mutableStateOf(false) }
     var showAddItemSheet by remember { mutableStateOf(false) }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
         rememberTopAppBarState(),
         snapAnimationSpec = spring(stiffness = Spring.StiffnessMediumLow)
     )
+
+    if (showRenameDialog) {
+        RenameListDialog(
+            currentTitle = listTitle,
+            onDismiss = { showRenameDialog = false },
+            onRename = onRenameList
+        )
+    }
 
     if (showDeleteDialog) {
         AlertDialog(
@@ -119,6 +130,13 @@ fun ListDetailScreen(
                         expanded = showOverflowMenu,
                         onDismissRequest = { showOverflowMenu = false }
                     ) {
+                        DropdownMenuItem(
+                            text = { Text("Rename") },
+                            onClick = {
+                                showOverflowMenu = false
+                                showRenameDialog = true
+                            }
+                        )
                         DropdownMenuItem(
                             text = { Text("Delete") },
                             onClick = {

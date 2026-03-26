@@ -65,6 +65,9 @@ actual fun ListBoxNavHost() {
                 onDeleteList = {
                     listDetailViewModel.deleteList()
                 },
+                onRenameList = { newTitle ->
+                    listDetailViewModel.updateListTitle(newTitle)
+                },
                 onSaveItem = { title, description ->
                     listDetailViewModel.createItem(title, description)
                 },
