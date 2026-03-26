@@ -280,13 +280,13 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [x] Pressing Enter in description creates line breaks
 - [x] Test keyboard navigation on both platforms
 
-### 6.6 Implement Bottom Sheet Save & Dismissal [LIST-30]
+### 6.6 Implement Bottom Sheet Save & Dismissal [LIST-30] ✅ COMPLETED
 
-- [ ] Call repository `createItem()` on Save button tap
-- [ ] Clear form and close bottom sheet on success
-- [ ] Dismiss bottom sheet on back gesture
-- [ ] Show confirmation dialog if user dismisses with unsaved text
-- [ ] Test Save and Cancel flows
+- [x] Call repository `createItem()` on Save button tap
+- [x] Clear form and close bottom sheet on success
+- [x] Dismiss bottom sheet on back gesture
+- [x] Show confirmation dialog if user dismisses with unsaved text
+- [x] Test Save and Cancel flows
 
 ### 6.7 Implement Unsaved Changes in Bottom Sheet [LIST-31]
 

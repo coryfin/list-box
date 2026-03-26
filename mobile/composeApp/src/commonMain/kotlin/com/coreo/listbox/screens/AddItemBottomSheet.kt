@@ -8,14 +8,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,10 +51,28 @@ fun AddItemBottomSheet(
     val canSave = title.isNotBlank() && !titleLengthError && !descriptionLengthError
 
     val descriptionFocusRequester = remember { FocusRequester() }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showDiscardDialog by remember { mutableStateOf(false) }
+    val isDirty by remember { derivedStateOf { title.isNotBlank() || description.isNotBlank() } }
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+        confirmValueChange = { value ->
+            if (value == SheetValue.Hidden && isDirty) {
+                showDiscardDialog = true
+                false
+            } else {
+                true
+            }
+        }
+    )
 
     ModalBottomSheet(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {
+            if (isDirty) {
+                showDiscardDialog = true
+            } else {
+                onDismiss()
+            }
+        },
         sheetState = sheetState
     ) {
         Column(
@@ -129,7 +151,6 @@ fun AddItemBottomSheet(
                         titleTouched = true
                         if (canSave) {
                             onSave(title.trim(), description.trim())
-                            onDismiss()
                         }
                     },
                     enabled = canSave
@@ -139,5 +160,26 @@ fun AddItemBottomSheet(
             }
             Spacer(modifier = Modifier.height(16.dp))
         }
+    }
+
+    if (showDiscardDialog) {
+        AlertDialog(
+            onDismissRequest = { showDiscardDialog = false },
+            title = { Text("Discard changes?") },
+            text = { Text("Your changes will be lost.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDiscardDialog = false
+                    onDismiss()
+                }) {
+                    Text("Discard")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDiscardDialog = false }) {
+                    Text("Keep editing")
+                }
+            }
+        )
     }
 }
