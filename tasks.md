@@ -149,44 +149,23 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 
 ---
 
-## Phase 4: List Detail Screen - Top App Bar Edit Mode
+## Phase 4: List Detail Screen - Rename & Scroll
 
-### 4.1 Implement Tap-to-Edit Title (Expanded State Only) [LIST-21]
+### 4.1 Implement Rename List Dialog [LIST-22] ← IN PROGRESS
 
-- [ ] Track edit mode state in ViewModel
-- [ ] Swap Text component for TextField on edit activation
-- [ ] Disable editing when top app bar is collapsed
-- [ ] Ensure zero layout shift during swap
-- [ ] Test title field activates in expanded state
+- [ ] Add "Rename" menu item to the overflow menu (above "Delete")
+- [ ] Create `RenameListDialog` composable with a pre-filled `TextField`
+- [ ] Disable Save button when title field is empty
+- [ ] Enforce max 100 character limit with character counter
+- [ ] Call repository `updateListTitle()` on Save confirmation
+- [ ] Test dialog pre-fills with current title
+- [ ] Test Cancel / tap-outside dismisses without saving
 
 ### 4.2 Implement Scroll Collapse/Expand Behavior [LIST-19]
 
 - [ ] Collapse top app bar on scroll down (using Material API)
 - [ ] Expand top app bar on scroll up (using Material API)
 - [ ] Test collapse/expand works smoothly on scroll
-
-### 4.3 Implement Save Action in Edit Mode [LIST-23]
-
-- [ ] Show "Save" button in trailing action position during edit
-- [ ] Hide overflow menu during edit
-- [ ] Call repository `updateListTitle()` on Save tap
-- [ ] Exit edit mode and persist changes
-- [ ] Test Save button only shows in edit mode
-
-### 4.4 Implement Unsaved Changes Confirmation [LIST-25]
-
-- [ ] Track draft state in ViewModel (separate from repository)
-- [ ] Show confirmation dialog on back press if title is edited
-- [ ] Show confirmation dialog on navigation if title is edited
-- [ ] Discard draft if user chooses "Discard"
-- [ ] Test confirmation appears/disappears correctly
-
-### 4.5 Implement Validation for Title Edit [LIST-20]
-
-- [ ] Enforce max 100 character limit
-- [ ] Show character counter during edit
-- [ ] Prevent Save if title is empty
-- [ ] Test validation feedback
 
 ---
 

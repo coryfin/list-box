@@ -73,8 +73,8 @@ The List Detail screen manages four primary UI states (for functional requiremen
 
 ### 4.3 App Bar & Menu Actions
 
-- **List & Item Detail Overflow:** The Top App Bar contains an overflow menu (three-dot icon) with a **Delete** action. In the List Detail screen, this deletes the entire list and navigates to Home. In the Item Detail screen, this deletes the individual item and navigates back to List Detail. Both require a confirmation dialog.
-- **Top App Bar Save Action:** Standardized to the trailing action section of the Top App Bar for consistency across List and Item detail screens. It handles focus management and commit visibility.
+- **List Detail Overflow:** The Top App Bar contains an overflow menu (three-dot icon) with two actions: **Rename** and **Delete**. **Rename** opens a dialog pre-filled with the current title; confirming persists the change via `updateListTitle()`. **Delete** deletes the entire list and navigates to Home. The Delete action requires a confirmation dialog.
+- **Item Detail Overflow:** The Top App Bar contains an overflow menu with a **Delete** action. Tapping **Delete** deletes the individual item and navigates back to List Detail. Requires a confirmation dialog.
 ### 4.4 Navigation & Screens
 
 - **Home Screen States:**

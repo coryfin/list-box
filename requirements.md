@@ -48,10 +48,10 @@ A mobile-first list manager where every entry is an "item." Each item consists o
 - **Layout:** Displays a top app bar with the list name and a vertical stack of all item titles.
 - **Top App Bar:**
   - Uses a **Material 3 Medium Top App Bar** where the List Title is positioned below the leading/trailing icon buttons to allow for **two-line wrapping**. 
-  - **Actions:** Contains an overflow menu with a **Delete** menu item. Tapping **Delete** triggers a confirmation prompt to delete the entire list and its items. After deletion, the user is taken back to the Home Screen.
-  - **Tap-to-Edit:** The List Title is editable via a **Tap-to-Edit** trigger. This trigger is only active when the **Medium Top App Bar** is in its expanded state; editing is disabled in the collapsed state. Tapping the title activates it for editing without causing layout shifts.
-  - **Save Action:** While in Edit Mode, a **Save** button appears as a trailing action in the **Medium Top App Bar**, replacing the overflow menu. Tapping **Save** persists the edits and returns the UI to a read-only state. If the user attempts to navigate away (including via the **system Back gesture**) without saving, they are prompted to save or discard their draft. This draft state applies only to text edits.
-  - **Scroll Behavior:** The App Bar should collapse as the user scrolls down and re-expand when scrolling to the top. Tapping the title in a collapsed state does nothing; the user must scroll to expand the bar before editing.
+  - **Actions:** Contains an overflow menu with two items:
+    - **Rename:** Opens a dialog pre-filled with the current list title. The user can edit the title and confirm to save. **Validation:** Required field, max 100 characters. The **Save** button is disabled when the field is empty. Tapping outside or pressing Cancel dismisses the dialog without saving.
+    - **Delete:** Triggers a confirmation prompt to delete the entire list and its items. After deletion, the user is taken back to the Home Screen.
+  - **Scroll Behavior:** The App Bar collapses as the user scrolls down and re-expands when scrolling to the top.
 - **Item Interactions:**
   - **Tap:** Tapping an item opens the **Item Detail Screen**.
   - **Long-press:** Long-pressing an item transitions the UI to a multi-select state where:
