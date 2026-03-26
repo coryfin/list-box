@@ -74,14 +74,14 @@ The List Detail screen manages four primary UI states (for functional requiremen
 ### 4.3 App Bar & Menu Actions
 
 - **List Detail Overflow:** The Top App Bar contains an overflow menu (three-dot icon) with two actions: **Rename** and **Delete**. **Rename** opens a dialog pre-filled with the current title; confirming persists the change via `updateListTitle()`. **Delete** deletes the entire list and navigates to Home. The Delete action requires a confirmation dialog.
-- **Item Detail Overflow:** The Top App Bar contains an overflow menu with a **Delete** action. Tapping **Delete** deletes the individual item and navigates back to List Detail. Requires a confirmation dialog.
+- **Item Detail:** In read-only state, the Top App Bar contains an overflow menu with a **Delete** action. Tapping **Delete** deletes the individual item and navigates back to List Detail. Requires a confirmation dialog. In Edit Mode, the overflow menu is replaced by a **Save** button trailing action.
 ### 4.4 Navigation & Screens
 
 - **Home Screen States:**
   - **Empty vs Populated:** Managed via `Flow<List<ListEntity>>`. Template buttons are injected into the UI list when the database is empty.
 - **"Add Item" View:** Implemented as a `ModalBottomSheetLayout`. The text field uses `onTextLayoutResult` to calculate dynamic height for expansion.
   - **Dismissal Handling:** Intercepting the dismissal signal tracks `isDirty` in the ViewModel to present a confirmation dialog.
-- **"Item Detail" View:** Implemented as a **Full Screen** component using the same **component swapping** (Text -> TextField) strategy as the List Detail screen.
+- **"Item Detail" View:** Implemented as a **Full Screen** component. Uses **component swapping** (read-only `Text` → active `TextField` with identical layout dimensions) to achieve zero layout shift when Edit Mode is activated. Edit Mode is triggered by a **FAB** in the bottom-right corner rather than tap-to-edit on individual fields — the FAB activates both the title (in the top app bar) and the description (in the body) simultaneously. The FAB is hidden while in Edit Mode. The ViewModel holds a **Draft State** separate from the repository until the user taps **Save**.
 
 ### 4.5 Reactive Repository
 

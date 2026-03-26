@@ -76,15 +76,22 @@ A mobile-first list manager where every entry is an "item." Each item consists o
 
 - **Layout:** Displays a top app bar with the item title and a body with the description
 - **Top App Bar:**
-  - Uses a **Material 3 Medium Top App Bar** where the List Title is positioned below the leading/trailing icon buttons to allow for **two-line wrapping**.
-  - **Actions:** Contains an overflow menu with a **Delete** menu item. Tapping **Delete** triggers a confirmation prompt to delete the item. After deletion, the user is taken back to the List Detail Screen.
-  - **Tap-to-Edit:** The Item Title is editable via a **Tap-to-Edit** trigger. This trigger is only active when the **Medium Top App Bar** is in its expanded state; editing is disabled in the collapsed state. Tapping the title activates it for editing without causing layout shifts.
-  - **Save Action:** While in Edit Mode, a **Save** button appears as a trailing action in the **Medium Top App Bar**, replacing the overflow menu. Tapping **Save** persists the edits and returns the UI to a read-only state. If the user attempts to navigate away (including via the **system Back gesture**) without saving, they are prompted to save or discard their draft.
-  - **Scroll Behavior:** The App Bar should collapse as the user scrolls down and re-expand when scrolling to the top. Tapping the title in a collapsed state does nothing; the user must scroll to expand the bar before editing.
-
+  - Uses a **Material 3 Medium Top App Bar** where the Item Title is positioned below the leading/trailing icon buttons to allow for **two-line wrapping**.
+  - **Read-Only Actions:** Contains an overflow menu with a **Delete** menu item. Tapping **Delete** triggers a confirmation prompt to delete the item. After deletion, the user is taken back to the List Detail Screen.
+  - **Scroll Behavior:** The App Bar collapses as the user scrolls down and re-expands when scrolling to the top.
 - **Body:**
-  - Displays the Item Description
-  - **Tap-to-Edit:** The Item Description is editable via a **Tap-to-Edit** trigger. Tapping the description activates it for editing without causing layout shifts.
+  - Displays the Item Description.
+- **Edit Mode (FAB):**
+  - A **FAB (Floating Action Button)** is displayed in the bottom-right corner in read-only state.
+  - Tapping the FAB activates **Edit Mode**, transitioning the entire screen to an editable state: the Item Title (in the top app bar) and the Item Description (in the body) both become editable fields simultaneously. The FAB is hidden in Edit Mode.
+  - The title and description fields use **component swapping** (read-only `Text` → `TextField` with matching layout dimensions) to ensure zero layout shift on transition.
+  - **Save Action:** While in Edit Mode, a **Save** button appears as a trailing action in the **Medium Top App Bar**, replacing the overflow menu. Tapping **Save** persists the edits and returns the UI to a read-only state. If the user attempts to navigate away (including via the **system Back gesture**) without saving, they are prompted to save or discard their draft.
+  - **Close Button**: While in Edit Mode, a **Close** icon button appears as a trailing action in the **Medium Top App Bar**, replacing the **Back** button. Tapping **Close** discards the edits and returns the UI to a read-only state.
+
+- **Validation:**
+  - **Item Title:** Required, max 100 characters.
+  - **Item Description:** Optional, max 5,000 characters.
+  - **Feedback:** Character counters and standard Material error messages. Validation acts as a "soft block" (disables Save button when title is empty).
 
 ---
 
