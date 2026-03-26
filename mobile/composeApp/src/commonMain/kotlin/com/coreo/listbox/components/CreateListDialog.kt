@@ -1,10 +1,13 @@
 package com.coreo.listbox.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -13,9 +16,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.unit.dp
 
 @Composable
 fun CreateListDialog(
@@ -23,10 +26,10 @@ fun CreateListDialog(
     onCreate: (String) -> Unit = {}
 ) {
     var listTitle by remember { mutableStateOf("") }
-    var isError by remember { mutableStateOf(false) }
-    
+
     val maxChars = 100
-    val isValid = listTitle.trim().isNotEmpty() && listTitle.length <= maxChars
+    val isTitleTooLong = listTitle.length > maxChars
+    val isValid = listTitle.trim().isNotEmpty() && !isTitleTooLong
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -37,33 +40,35 @@ fun CreateListDialog(
             Column(modifier = Modifier.fillMaxWidth()) {
                 TextField(
                     value = listTitle,
-                    onValueChange = { newValue ->
-                        if (newValue.length <= maxChars) {
-                            listTitle = newValue
-                            isError = false
-                        }
-                    },
+                    onValueChange = { listTitle = it },
                     placeholder = { Text("List title") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
-                    isError = isError,
+                    isError = isTitleTooLong,
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Sentences
-                    )
+                    ),
+                    supportingText = {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (isTitleTooLong) {
+                                Text(
+                                    text = "Max $maxChars characters",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            } else {
+                                Spacer(Modifier.weight(1f))
+                            }
+                            Text(
+                                text = "${listTitle.length}/$maxChars",
+                                color = if (isTitleTooLong) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                 )
-                Text(
-                    text = "${listTitle.length}/$maxChars",
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-                if (isError) {
-                    Text(
-                        text = "List title is required",
-                        color = androidx.compose.material3.MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
             }
         },
         confirmButton = {
@@ -72,10 +77,9 @@ fun CreateListDialog(
                     if (isValid) {
                         onCreate(listTitle.trim())
                         onDismiss()
-                    } else {
-                        isError = true
                     }
-                }
+                },
+                enabled = isValid
             ) {
                 Text("Create")
             }

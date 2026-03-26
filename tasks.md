@@ -167,6 +167,13 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [ ] Expand top app bar on scroll up (using Material API)
 - [ ] Test collapse/expand works smoothly on scroll
 
+### 4.5 Implement Validation for Title Edit [LIST-20] 🚧 IN PROGRESS
+
+- [ ] Enforce max 100 character limit
+- [ ] Show character counter during edit
+- [ ] Prevent Save if title is empty
+- [ ] Test validation feedback
+
 ---
 
 ## Phase 5: Item Detail Screen
