@@ -65,3 +65,11 @@ Resolves LIST-2
 ### 3. Merge branch
 
 I working on a feature branch, merge the feature branch into main locally, then switch to the main branch and delete the feature branch.
+
+## Connecting to Linear
+
+### 1. Calling save_issue
+
+When calling Linear MCP save_issue, ALWAYS include all arguments in the arguments object:  
+{"server": "linear", "toolName": "save_issue", "arguments": {"title": "...", "teamId": "...", ...}}  
+NEVER call save_issue without the arguments field.

@@ -159,7 +159,7 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [ ] Ensure zero layout shift during swap
 - [ ] Test title field activates in expanded state
 
-### 4.2 Implement Scroll Collapse/Expand Behavior [LIST-22]
+### 4.2 Implement Scroll Collapse/Expand Behavior [LIST-19]
 
 - [ ] Collapse top app bar on scroll down (using Material API)
 - [ ] Expand top app bar on scroll up (using Material API)
