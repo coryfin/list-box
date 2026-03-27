@@ -57,6 +57,10 @@ kotlin {
             implementation(libs.kotlin.test)
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
         }
+        getByName("androidUnitTest").dependencies {
+            implementation(libs.sqldelight.driver.jdbc)
+            implementation("org.xerial:sqlite-jdbc:3.45.1.0")
+        }
     }
 }
 

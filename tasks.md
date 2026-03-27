@@ -328,10 +328,10 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [x] Write query to update item `orderIndex` value
 - [x] Test update query with sample data
 
-### 8.2 Implement ListBoxRepository - Reorder Operations [LIST-45]
+### 8.2 Implement ListBoxRepository - Reorder Operations [LIST-37] ✅ COMPLETED
 
-- [ ] Implement `reorderItem(itemId: String, newOrderIndex: Double)`
-- [ ] Unit test reorder repository method
+- [x] Implement `reorderItem(itemId: String, newOrderIndex: Double)`
+- [x] Unit test reorder repository method
 
 ### 8.3 Implement Drag-and-Drop Entry (from Long-Press) [LIST-47]
 
