@@ -323,10 +323,10 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 
 ## Phase 8: List Detail Screen - Drag-and-Drop Reordering
 
-### 8.1 Implement Reorder Database Query (SQLDelight) [LIST-44]
+### 8.1 Implement Reorder Database Query (SQLDelight) [LIST-45] ✅ COMPLETED
 
-- [ ] Write query to update item `orderIndex` value
-- [ ] Test update query with sample data
+- [x] Write query to update item `orderIndex` value
+- [x] Test update query with sample data
 
 ### 8.2 Implement ListBoxRepository - Reorder Operations [LIST-45]
 

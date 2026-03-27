@@ -3,31 +3,31 @@ CREATE TABLE itemEntity (
     listId TEXT NOT NULL,
     title TEXT NOT NULL,
     description TEXT,
-    position INTEGER NOT NULL,
+    orderIndex REAL NOT NULL,
     FOREIGN KEY(listId) REFERENCES listEntity(id) ON DELETE CASCADE
 );
 
--- Index for efficient retrieval of items in a list, ordered by position
-CREATE INDEX idx_item_list_position ON itemEntity(listId, position);
+-- Index for efficient retrieval of items in a list, ordered by orderIndex
+CREATE INDEX idx_item_list_order ON itemEntity(listId, orderIndex);
 
 -- Queries
 insertItem:
-INSERT INTO itemEntity(id, listId, title, description, position)
+INSERT INTO itemEntity(id, listId, title, description, orderIndex)
 VALUES (?, ?, ?, ?, ?);
 
 getItemsByListId:
-SELECT id, listId, title, description, position FROM itemEntity
+SELECT id, listId, title, description, orderIndex FROM itemEntity
 WHERE listId = ?
-ORDER BY position;
+ORDER BY orderIndex;
 
 updateItem:
 UPDATE itemEntity
 SET title = ?, description = ?
 WHERE id = ?;
 
-updateItemPosition:
+updateItemOrderIndex:
 UPDATE itemEntity
-SET position = ?
+SET orderIndex = ?
 WHERE id = ?;
 
 deleteItem:
@@ -43,13 +43,9 @@ DELETE FROM itemEntity
 WHERE listId = ?;
 
 getItemById:
-SELECT id, listId, title, description, position FROM itemEntity
+SELECT id, listId, title, description, orderIndex FROM itemEntity
 WHERE id = ?;
 
-updateItemsPositionRange:
-UPDATE itemEntity
-SET position = CASE
-    WHEN position > ? THEN position - 1
-    ELSE position
-END
-WHERE listId = ? AND position >= ?;
+getMaxOrderIndex:
+SELECT MAX(orderIndex) FROM itemEntity
+WHERE listId = ?;

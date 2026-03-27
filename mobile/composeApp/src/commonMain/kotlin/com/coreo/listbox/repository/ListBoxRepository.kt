@@ -72,21 +72,36 @@ class ListBoxRepository(private val database: ListBoxDatabase) {
     }
     
     /**
-     * Create a new item with an auto-generated UUID
+     * Create a new item with an auto-generated UUID, appended to the end of the list
      */
-    suspend fun createItem(listId: String, title: String, description: String?, position: Int = 0) {
+    suspend fun createItem(listId: String, title: String, description: String?) {
         val id = generateUUID()
+        val maxOrderIndex = database.itemEntityQueries.getMaxOrderIndex(listId)
+            .executeAsOneOrNull()
+            ?.MAX
+            ?: 0.0
+        val newOrderIndex = maxOrderIndex + 1.0
         database.itemEntityQueries.insertItem(
             id = id,
             listId = listId,
             title = title,
             description = description,
-            position = position.toLong()
+            orderIndex = newOrderIndex
         )
     }
-    
+
     /**
-     * Get all items for a specific list as a reactive Flow, sorted by position
+     * Update the orderIndex of an item for drag-and-drop reordering
+     */
+    suspend fun reorderItem(itemId: String, newOrderIndex: Double) {
+        database.itemEntityQueries.updateItemOrderIndex(
+            orderIndex = newOrderIndex,
+            id = itemId
+        )
+    }
+
+    /**
+     * Get all items for a specific list as a reactive Flow, sorted by orderIndex
      */
     fun getItemsForList(listId: String): Flow<List<ItemEntity>> {
         return database.itemEntityQueries.getItemsByListId(listId)

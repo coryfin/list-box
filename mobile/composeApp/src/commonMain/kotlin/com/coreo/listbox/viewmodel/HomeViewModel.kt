@@ -54,7 +54,7 @@ class HomeViewModel(private val repository: ListBoxRepository) : ViewModel() {
             
             // Create an example item with template labels
             val descriptionText = descriptionLabels.joinToString("\n")
-            repository.createItem(newList.id, exampleItemTitle, descriptionText, 0)
+            repository.createItem(newList.id, exampleItemTitle, descriptionText)
             
             newList
         } catch (e: Exception) {
