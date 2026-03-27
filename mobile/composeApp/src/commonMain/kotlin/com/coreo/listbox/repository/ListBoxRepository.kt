@@ -120,4 +120,11 @@ class ListBoxRepository(private val database: ListBoxDatabase) {
     suspend fun deleteItem(itemId: String) {
         database.itemEntityQueries.deleteItem(id = itemId)
     }
+
+    /**
+     * Delete multiple items in a single query
+     */
+    suspend fun deleteItems(itemIds: Collection<String>) {
+        database.itemEntityQueries.deleteItemsByIds(id = itemIds)
+    }
 }

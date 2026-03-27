@@ -303,14 +303,14 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [x] Add delete icon to trailing actions
 - [x] Test app bar switches on multi-select entry/exit
 
-### 7.4 Implement Multi-Select Delete [LIST-42]
+### 7.4 Implement Multi-Select Delete [LIST-40] ✅ COMPLETED
 
-- [ ] Show confirmation dialog when delete icon is tapped
-- [ ] Display: "Delete N items?"
-- [ ] Call repository `deleteItem()` for each selected item
-- [ ] Exit multi-select mode after deletion
-- [ ] Update UI (remove deleted items from list)
-- [ ] Test deletion works for multiple items
+- [x] Show confirmation dialog when delete icon is tapped
+- [x] Display: "Delete N items?"
+- [x] Call repository `deleteItem()` for each selected item
+- [x] Exit multi-select mode after deletion
+- [x] Update UI (remove deleted items from list)
+- [x] Test deletion works for multiple items
 
 ### 7.5 Implement Multi-Select Exit [LIST-43]
 

@@ -68,6 +68,7 @@ fun ListDetailScreen(
 ) {
     var showOverflowMenu by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showDeleteSelectedDialog by remember { mutableStateOf(false) }
     var showRenameDialog by remember { mutableStateOf(false) }
     var showAddItemSheet by remember { mutableStateOf(false) }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
@@ -80,6 +81,28 @@ fun ListDetailScreen(
             currentTitle = listTitle,
             onDismiss = { showRenameDialog = false },
             onRename = onRenameList
+        )
+    }
+
+    if (showDeleteSelectedDialog) {
+        val count = selectedItems.size
+        AlertDialog(
+            onDismissRequest = { showDeleteSelectedDialog = false },
+            title = { Text(if (count == 1) "Delete 1 item?" else "Delete $count items?") },
+            text = { Text("This action cannot be undone.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDeleteSelectedDialog = false
+                    onDeleteSelectedItems()
+                }) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteSelectedDialog = false }) {
+                    Text("Cancel")
+                }
+            }
         )
     }
 
@@ -153,7 +176,7 @@ fun ListDetailScreen(
                         }
                     },
                     actions = {
-                        IconButton(onClick = onDeleteSelectedItems) {
+                        IconButton(onClick = { showDeleteSelectedDialog = true }) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
                                 contentDescription = "Delete selected items"

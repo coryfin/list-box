@@ -34,6 +34,10 @@ deleteItem:
 DELETE FROM itemEntity
 WHERE id = ?;
 
+deleteItemsByIds:
+DELETE FROM itemEntity
+WHERE id IN ?;
+
 deleteItemsByListId:
 DELETE FROM itemEntity
 WHERE listId = ?;

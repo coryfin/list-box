@@ -49,6 +49,14 @@ class ListDetailViewModel(
         _isMultiSelectMode.value = false
     }
 
+    fun deleteSelectedItems() {
+        val toDelete = _selectedItems.value
+        viewModelScope.launch {
+            repository.deleteItems(toDelete)
+            exitMultiSelect()
+        }
+    }
+
     fun createItem(title: String, description: String? = null) {
         viewModelScope.launch {
             repository.createItem(listId, title, description)
