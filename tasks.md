@@ -295,13 +295,13 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [x] Visual feedback (highlight/checkbox) for selected items
 - [x] Test toggling selection works
 
-### 7.3 Implement Multi-Select Top App Bar [LIST-41]
+### 7.3 Implement Multi-Select Top App Bar [LIST-44] ✅ COMPLETED
 
-- [ ] Replace standard top app bar with multi-select variant in edit mode
-- [ ] Show close icon (X) to exit multi-select
-- [ ] Display count of selected items: "N items selected"
-- [ ] Add delete icon to trailing actions
-- [ ] Test app bar switches on multi-select entry/exit
+- [x] Replace standard top app bar with multi-select variant in edit mode
+- [x] Show close icon (X) to exit multi-select
+- [x] Display count of selected items: "N items selected"
+- [x] Add delete icon to trailing actions
+- [x] Test app bar switches on multi-select entry/exit
 
 ### 7.4 Implement Multi-Select Delete [LIST-42]
 

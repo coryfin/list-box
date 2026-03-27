@@ -84,6 +84,10 @@ actual fun ListBoxNavHost() {
                         listDetailViewModel.enterMultiSelect(itemId)
                     }
                 },
+                onExitMultiSelect = {
+                    listDetailViewModel.exitMultiSelect()
+                },
+                onDeleteSelectedItems = {},
                 items = items,
                 listTitle = list?.title ?: "List",
                 isMultiSelectMode = isMultiSelectMode,

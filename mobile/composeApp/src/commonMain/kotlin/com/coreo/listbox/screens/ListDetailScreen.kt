@@ -6,10 +6,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -50,6 +59,8 @@ fun ListDetailScreen(
     onRenameList: (String) -> Unit = {},
     onSaveItem: (title: String, description: String) -> Unit = { _, _ -> },
     onItemLongClick: (String) -> Unit = {},
+    onExitMultiSelect: () -> Unit = {},
+    onDeleteSelectedItems: () -> Unit = {},
     items: List<ItemEntity> = emptyList(),
     listTitle: String = "List",
     isMultiSelectMode: Boolean = false,
@@ -109,50 +120,94 @@ fun ListDetailScreen(
             }
         },
         topBar = {
-            MediumTopAppBar(
-                title = {
-                    Text(
-                        text = listTitle,
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                },
-                scrollBehavior = scrollBehavior,
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
+            AnimatedContent(
+                targetState = isMultiSelectMode,
+                transitionSpec = {
+                    if (targetState) {
+                        // entering multi-select: slide in from top, fade in
+                        (slideInVertically { -it / 4 } + fadeIn()) togetherWith
+                            (slideOutVertically { it / 4 } + fadeOut())
+                    } else {
+                        // exiting multi-select: slide in from below, fade in
+                        (slideInVertically { it / 4 } + fadeIn()) togetherWith
+                            (slideOutVertically { -it / 4 } + fadeOut())
                     }
                 },
-                actions = {
-                    IconButton(onClick = { showOverflowMenu = true }) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "More options"
+                label = "TopAppBarTransition"
+            ) { multiSelectActive ->
+            if (multiSelectActive) {
+                TopAppBar(
+                    title = {
+                        val count = selectedItems.size
+                        Text(
+                            text = if (count == 1) "1 item selected" else "$count items selected",
+                            style = MaterialTheme.typography.titleLarge
                         )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onExitMultiSelect) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Exit multi-select"
+                            )
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = onDeleteSelectedItems) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Delete selected items"
+                            )
+                        }
                     }
-                    DropdownMenu(
-                        expanded = showOverflowMenu,
-                        onDismissRequest = { showOverflowMenu = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Rename") },
-                            onClick = {
-                                showOverflowMenu = false
-                                showRenameDialog = true
-                            }
+                )
+            } else {
+                MediumTopAppBar(
+                    title = {
+                        Text(
+                            text = listTitle,
+                            style = MaterialTheme.typography.headlineSmall
                         )
-                        DropdownMenuItem(
-                            text = { Text("Delete") },
-                            onClick = {
-                                showOverflowMenu = false
-                                showDeleteDialog = true
-                            }
-                        )
+                    },
+                    scrollBehavior = scrollBehavior,
+                    navigationIcon = {
+                        IconButton(onClick = onBackClick) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back"
+                            )
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = { showOverflowMenu = true }) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "More options"
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = showOverflowMenu,
+                            onDismissRequest = { showOverflowMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Rename") },
+                                onClick = {
+                                    showOverflowMenu = false
+                                    showRenameDialog = true
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Delete") },
+                                onClick = {
+                                    showOverflowMenu = false
+                                    showDeleteDialog = true
+                                }
+                            )
+                        }
                     }
-                }
-            )
+                )
+            }
+            } // end AnimatedContent
         }
     ) { paddingValues ->
         if (showAddItemSheet) {

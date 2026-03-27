@@ -44,6 +44,11 @@ class ListDetailViewModel(
         }
     }
 
+    fun exitMultiSelect() {
+        _selectedItems.value = emptySet()
+        _isMultiSelectMode.value = false
+    }
+
     fun createItem(title: String, description: String? = null) {
         viewModelScope.launch {
             repository.createItem(listId, title, description)
