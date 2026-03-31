@@ -29,6 +29,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,19 +45,19 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.coreo.listbox.database.ItemEntity
+import com.coreo.listbox.di.ServiceLocator
+import com.coreo.listbox.viewmodel.ItemDetailViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun ItemDetailScreen(
     itemId: String,
-    onBackClick: () -> Unit,
-    onDeleteItem: () -> Unit = {},
-    onEnterEditMode: () -> Unit = {},
-    onExitEditMode: () -> Unit = {},
-    onSaveItem: (String, String?) -> Unit = { _, _ -> },
-    item: ItemEntity? = null,
-    isEditMode: Boolean = false
+    onBackClick: () -> Unit
 ) {
+    val repository = remember { ServiceLocator.getRepository() }
+    val viewModel = remember { ItemDetailViewModel(repository, itemId) }
+    val item by viewModel.item.collectAsState()
+    val isEditMode by viewModel.isEditMode.collectAsState()
     var showOverflowMenu by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showDiscardDialog by remember { mutableStateOf(false) }
@@ -84,7 +85,7 @@ fun ItemDetailScreen(
         } else {
             draftTitle = TextFieldValue(item?.title ?: "")
             draftDescription = item?.description ?: ""
-            onExitEditMode()
+            viewModel.exitEditMode()
         }
     }
 
@@ -98,7 +99,7 @@ fun ItemDetailScreen(
                     showDiscardDialog = false
                     draftTitle = TextFieldValue(item?.title ?: "")
                     draftDescription = item?.description ?: ""
-                    onExitEditMode()
+                    viewModel.exitEditMode()
                 }) {
                     Text("Discard")
                 }
@@ -119,7 +120,7 @@ fun ItemDetailScreen(
             confirmButton = {
                 TextButton(onClick = {
                     showDeleteDialog = false
-                    onDeleteItem()
+                    viewModel.deleteItem()
                     onBackClick()
                 }) {
                     Text("Delete")
@@ -137,7 +138,7 @@ fun ItemDetailScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         floatingActionButton = {
             if (!isEditMode) {
-                FloatingActionButton(onClick = onEnterEditMode) {
+                FloatingActionButton(onClick = { viewModel.enterEditMode() }) {
                     Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = "Edit"
@@ -187,7 +188,7 @@ fun ItemDetailScreen(
                             } else {
                                 draftTitle = TextFieldValue(item?.title ?: "")
                                 draftDescription = item?.description ?: ""
-                                onExitEditMode()
+                                viewModel.exitEditMode()
                             }
                         }) {
                             Icon(
@@ -207,7 +208,7 @@ fun ItemDetailScreen(
                 actions = {
                     if (isEditMode) {
                         IconButton(
-                            onClick = { onSaveItem(draftTitle.text, draftDescription.ifBlank { null }) },
+                            onClick = { viewModel.saveItem(draftTitle.text, draftDescription.ifBlank { null }) },
                             enabled = draftTitle.text.isNotBlank()
                         ) {
                             Icon(

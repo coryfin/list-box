@@ -31,17 +31,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.coreo.listbox.components.CreateListDialog
 import com.coreo.listbox.database.ListEntity
+import com.coreo.listbox.di.ServiceLocator
 import com.coreo.listbox.util.formatDateForListCard
+import com.coreo.listbox.viewmodel.HomeViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onListSelect: (String) -> Unit,
-    onCreateBlankList: suspend (String) -> Unit,
-    onCreateFromTemplate: suspend (String) -> Unit,
-    listEntities: List<ListEntity> = emptyList()
+    onListCreated: (String) -> Unit
 ) {
+    val repository = remember { ServiceLocator.getRepository() }
+    val viewModel = remember { HomeViewModel(repository) }
+    val listEntities by viewModel.lists.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     var showCreateDialog by remember { mutableStateOf(false) }
     val isPopulated = listEntities.isNotEmpty()
@@ -51,7 +54,8 @@ fun HomeScreen(
             onDismiss = { showCreateDialog = false },
             onCreate = { title ->
                 coroutineScope.launch {
-                    onCreateBlankList(title)
+                    val newList = viewModel.createListAndGetId(title)
+                    if (newList != null) onListCreated(newList.id)
                 }
                 showCreateDialog = false
             }
@@ -86,8 +90,14 @@ fun HomeScreen(
     ) { paddingValues ->
         if (listEntities.isEmpty()) {
             EmptyListState(
-                onCreateBlankList = onCreateBlankList,
-                onCreateFromTemplate = onCreateFromTemplate,
+                onCreateBlankList = { title ->
+                    val newList = viewModel.createListAndGetId(title)
+                    if (newList != null) onListCreated(newList.id)
+                },
+                onCreateFromTemplate = { templateType ->
+                    val newList = viewModel.createListFromTemplateAndGetId(templateType)
+                    if (newList != null) onListCreated(newList.id)
+                },
                 onShowCreateDialog = { showCreateDialog = true },
                 modifier = Modifier.padding(paddingValues)
             )

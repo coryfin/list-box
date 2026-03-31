@@ -38,6 +38,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,24 +49,23 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import com.coreo.listbox.components.RenameListDialog
 import com.coreo.listbox.database.ItemEntity
+import com.coreo.listbox.di.ServiceLocator
+import com.coreo.listbox.viewmodel.ListDetailViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListDetailScreen(
     listId: String,
-    onItemSelect: (String) -> Unit,
-    onBackClick: () -> Unit,
-    onDeleteList: () -> Unit,
-    onRenameList: (String) -> Unit = {},
-    onSaveItem: (title: String, description: String) -> Unit = { _, _ -> },
-    onItemLongClick: (String) -> Unit = {},
-    onExitMultiSelect: () -> Unit = {},
-    onDeleteSelectedItems: () -> Unit = {},
-    items: List<ItemEntity> = emptyList(),
-    listTitle: String = "List",
-    isMultiSelectMode: Boolean = false,
-    selectedItems: Set<String> = emptySet()
+    onItemNavigate: (String) -> Unit,
+    onBackClick: () -> Unit
 ) {
+    val repository = remember { ServiceLocator.getRepository() }
+    val viewModel = remember { ListDetailViewModel(repository, listId) }
+    val items by viewModel.items.collectAsState()
+    val list by viewModel.list.collectAsState()
+    val isMultiSelectMode by viewModel.isMultiSelectMode.collectAsState()
+    val selectedItems by viewModel.selectedItems.collectAsState()
+    val listTitle = list?.title ?: "List"
     var showOverflowMenu by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showDeleteSelectedDialog by remember { mutableStateOf(false) }
@@ -80,7 +80,7 @@ fun ListDetailScreen(
         RenameListDialog(
             currentTitle = listTitle,
             onDismiss = { showRenameDialog = false },
-            onRename = onRenameList
+            onRename = { newTitle -> viewModel.updateListTitle(newTitle) }
         )
     }
 
@@ -93,7 +93,7 @@ fun ListDetailScreen(
             confirmButton = {
                 TextButton(onClick = {
                     showDeleteSelectedDialog = false
-                    onDeleteSelectedItems()
+                    viewModel.deleteSelectedItems()
                 }) {
                     Text("Delete")
                 }
@@ -114,7 +114,7 @@ fun ListDetailScreen(
             confirmButton = {
                 TextButton(onClick = {
                     showDeleteDialog = false
-                    onDeleteList()
+                    viewModel.deleteList()
                     onBackClick()
                 }) {
                     Text("Delete")
@@ -168,7 +168,7 @@ fun ListDetailScreen(
                         )
                     },
                     navigationIcon = {
-                        IconButton(onClick = onExitMultiSelect) {
+                        IconButton(onClick = { viewModel.exitMultiSelect() }) {
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = "Exit multi-select"
@@ -237,7 +237,7 @@ fun ListDetailScreen(
             AddItemBottomSheet(
                 onDismiss = { showAddItemSheet = false },
                 onSave = { title, description ->
-                    onSaveItem(title, description)
+                    viewModel.createItem(title, description)
                     showAddItemSheet = false
                 }
             )
@@ -259,8 +259,14 @@ fun ListDetailScreen(
                     ItemCard(
                         item = item,
                         isSelected = selectedItems.contains(item.id),
-                        onClick = { onItemSelect(item.id) },
-                        onLongClick = { onItemLongClick(item.id) }
+                        onClick = {
+                            if (isMultiSelectMode) viewModel.toggleItemSelection(item.id)
+                            else onItemNavigate(item.id)
+                        },
+                        onLongClick = {
+                            if (isMultiSelectMode) viewModel.toggleItemSelection(item.id)
+                            else viewModel.enterMultiSelect(item.id)
+                        }
                     )
                 }
             }
