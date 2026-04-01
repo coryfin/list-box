@@ -29,14 +29,9 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -45,7 +40,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import com.coreo.listbox.components.RenameListDialog
 import com.coreo.listbox.database.ItemEntity
@@ -71,10 +65,6 @@ fun ListDetailScreen(
     var showDeleteSelectedDialog by remember { mutableStateOf(false) }
     var showRenameDialog by remember { mutableStateOf(false) }
     var showAddItemSheet by remember { mutableStateOf(false) }
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
-        rememberTopAppBarState(),
-        snapAnimationSpec = spring(stiffness = Spring.StiffnessMediumLow)
-    )
 
     if (showRenameDialog) {
         RenameListDialog(
@@ -129,7 +119,6 @@ fun ListDetailScreen(
     }
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showAddItemSheet = true },
@@ -185,14 +174,13 @@ fun ListDetailScreen(
                     }
                 )
             } else {
-                MediumTopAppBar(
+                TopAppBar(
                     title = {
                         Text(
                             text = listTitle,
-                            style = MaterialTheme.typography.headlineSmall
+                            style = MaterialTheme.typography.titleLarge
                         )
                     },
-                    scrollBehavior = scrollBehavior,
                     navigationIcon = {
                         IconButton(onClick = onBackClick) {
                             Icon(
