@@ -49,6 +49,15 @@ class ListDetailViewModel(
         _isMultiSelectMode.value = false
     }
 
+    fun saveOrderedItems(orderedItems: List<ItemEntity>) {
+        viewModelScope.launch {
+            orderedItems.forEachIndexed { index, item ->
+                // TODO: update all items in one query
+                repository.reorderItem(item.id, index.toDouble())
+            }
+        }
+    }
+
     fun deleteSelectedItems() {
         val toDelete = _selectedItems.value
         viewModelScope.launch {

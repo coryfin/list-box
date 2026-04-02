@@ -19,6 +19,7 @@ material3 = "1.10.0-alpha05"
 compose-material-icons = "1.7.3"
 sqldelight = "2.0.1"
 kotlinx-coroutines = "1.8.0"
+reorderable = "3.0.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -49,6 +50,7 @@ sqldelight-driver-jdbc = { module = "app.cash.sqldelight:jdbc-driver", version.r
 kotlin-inject = { module = "me.tatarka.inject:kotlin-inject-runtime", version.ref = "kotlin-inject" }
 kotlin-inject-compiler = { module = "me.tatarka.inject:kotlin-inject-compiler-ksp", version.ref = "kotlin-inject" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
+reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

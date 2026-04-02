@@ -1,26 +1,24 @@
 package com.coreo.listbox.screens
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -34,7 +32,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,13 +43,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.coreo.listbox.components.RenameListDialog
 import com.coreo.listbox.database.ItemEntity
 import com.coreo.listbox.di.ServiceLocator
 import com.coreo.listbox.viewmodel.ListDetailViewModel
+import sh.calvin.reorderable.ReorderableCollectionItemScope
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 //sealed class ListScreenStateEnriched {
 //    object Base : ListScreenStateEnriched()
@@ -74,7 +75,7 @@ fun ListDetailScreen(
 ) {
     val repository = remember { ServiceLocator.getRepository() }
     val viewModel = remember { ListDetailViewModel(repository, listId) }
-    val items by viewModel.items.collectAsState()
+//    val items by viewModel.items.collectAsState()
     val list by viewModel.list.collectAsState()
 //    val isMultiSelectMode by viewModel.isMultiSelectMode.collectAsState()
 //    val selectedItems by viewModel.selectedItems.collectAsState()
@@ -87,8 +88,22 @@ fun ListDetailScreen(
 
     var screenState by remember { mutableStateOf(ListScreenState.Base) }
     val selectedItems = remember { mutableStateSetOf<String>() }
-    var dragStartY by remember { mutableStateOf(0f) }
-    var dragY by remember { mutableStateOf(0f) }
+
+    val dbItems by viewModel.items.collectAsState()
+    var items by remember { mutableStateOf(dbItems) }
+
+    LaunchedEffect(dbItems) {
+        // TODO: don't do this if dragging
+        items = dbItems
+    }
+
+    val lazyListState = rememberLazyListState()
+    val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
+        // Update the list
+        items = items.toMutableList().apply {
+            add(to.index, removeAt(from.index))
+        }
+    }
 
     fun toggleItemSelection(item: ItemEntity) {
         if (selectedItems.contains(item.id)) {
@@ -270,55 +285,35 @@ fun ListDetailScreen(
             )
         } else {
             LazyColumn(
+                state = lazyListState,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 horizontalAlignment = Alignment.Start
             ) {
-                items(items) { item ->
-                    ItemCard(
-                        item = item,
-                        isSelected = selectedItems.contains(item.id),
-                        onTap = {
-                            if (screenState == ListScreenState.Base) {
-                                onItemNavigate(item.id)
-                            } else if (screenState == ListScreenState.MultiSelect) {
-                                toggleItemSelection(item)
-                            }
-                        },
-                        onLongPress = { offset ->
-                            if (screenState == ListScreenState.Base) {
-                                screenState = ListScreenState.SelectOrDrag
-                                dragStartY = offset.y
-                                toggleItemSelection(item)
-                            } else if (screenState == ListScreenState.MultiSelect) {
-                                toggleItemSelection(item)
-                            }
-//                            if (isMultiSelectMode) viewModel.toggleItemSelection(item.id)
-//                            else viewModel.enterMultiSelect(item.id)
-                        },
-                        onDrag = { dragAmount ->
-                            if (screenState == ListScreenState.SelectOrDrag) {
-                                screenState = ListScreenState.Dragging
-                                dragY += dragAmount.y
-                                println("dragY: $dragY")
-                                selectedItems.clear()
-                                // TODO: update item position
-                            } else if (screenState == ListScreenState.Dragging) {
-                                // TODO: update item position
-                                dragY += dragAmount.y
-                                println("dragY: $dragY")
-                            }
-                        },
-                        onDragEnd = {
-                            if (screenState === ListScreenState.SelectOrDrag) {
-                                screenState = ListScreenState.MultiSelect
-                            } else if (screenState == ListScreenState.Dragging) {
-                                screenState = ListScreenState.Base
-                            }
-                        }
-                    )
+                items(items, key = { it.id }) { item ->
+                    ReorderableItem(
+                        state = reorderableLazyListState,
+                        key = item.id
+                    ) { isDragging ->
+                        ItemCard(
+                            item = item,
+                            isSelected = selectedItems.contains(item.id),
+                            isDragging = isDragging,
+                            onTap = {
+                                if (screenState == ListScreenState.Base) {
+                                    onItemNavigate(item.id)
+                                } else if (screenState == ListScreenState.MultiSelect) {
+                                    toggleItemSelection(item)
+                                }
+                            },
+                            onDragEnd = {
+                                viewModel.saveOrderedItems(items)
+                            },
+                            scope = this
+                        )
+                    }
                 }
             }
         }
@@ -329,41 +324,22 @@ fun ListDetailScreen(
 @Composable
 private fun ItemCard(
     item: ItemEntity,
-    onTap: () -> Unit,
-    onLongPress: (offset: Offset) -> Unit,
-    onDrag: (dragAmount: Offset) -> Unit,
-    onDragEnd: () -> Unit,
     isSelected: Boolean = false,
-    modifier: Modifier = Modifier
+    isDragging: Boolean = false,
+    onTap: () -> Unit,
+    onDragEnd: () -> Unit,
+    scope: ReorderableCollectionItemScope
 ) {
     Card(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(vertical = 8.dp)
-//            .combinedClickable(
-//                onClick = { onClick() },
-//                onLongClick = { onLongClick() }
-//            ),
-            .pointerInput(item.id) {
-                detectTapGestures(
-                    onTap = { onTap() },
-                )
-            }
-            .pointerInput(item.id) {
-                detectDragGesturesAfterLongPress(
-                    onDragStart = { offset ->
-                        onLongPress(offset)
-                    },
-                    onDrag = { change, dragAmount ->
-                        onDrag(dragAmount)
-                    },
-                    onDragEnd = {
-                        onDragEnd()
-                    }
-                )
-            },
+        onClick = onTap,
+        modifier = with(scope) {
+            Modifier
+                .longPressDraggableHandle(onDragStopped = onDragEnd)
+                .fillMaxSize()
+                .padding(vertical = 8.dp)
+        },
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected)
+            containerColor = if (isSelected || isDragging)
                 MaterialTheme.colorScheme.primaryContainer
             else
                 MaterialTheme.colorScheme.surface

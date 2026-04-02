@@ -49,6 +49,7 @@ kotlin {
             implementation(libs.sqldelight.runtime)
             implementation(libs.sqldelight.coroutines)
             implementation(libs.kotlin.inject)
+            implementation(libs.reorderable)
         }
         iosMain.dependencies {
             implementation(libs.sqldelight.driver.native)
