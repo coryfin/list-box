@@ -43,6 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.coreo.listbox.components.RenameListDialog
@@ -86,6 +87,8 @@ fun ListDetailScreen(
 
     var screenState by remember { mutableStateOf(ListScreenState.Base) }
     val selectedItems = remember { mutableStateSetOf<String>() }
+    var dragStartY by remember { mutableStateOf(0f) }
+    var dragY by remember { mutableStateOf(0f) }
 
     fun toggleItemSelection(item: ItemEntity) {
         if (selectedItems.contains(item.id)) {
@@ -284,9 +287,10 @@ fun ListDetailScreen(
                                 toggleItemSelection(item)
                             }
                         },
-                        onLongPress = {
+                        onLongPress = { offset ->
                             if (screenState == ListScreenState.Base) {
                                 screenState = ListScreenState.SelectOrDrag
+                                dragStartY = offset.y
                                 toggleItemSelection(item)
                             } else if (screenState == ListScreenState.MultiSelect) {
                                 toggleItemSelection(item)
@@ -294,13 +298,17 @@ fun ListDetailScreen(
 //                            if (isMultiSelectMode) viewModel.toggleItemSelection(item.id)
 //                            else viewModel.enterMultiSelect(item.id)
                         },
-                        onDrag = {
+                        onDrag = { dragAmount ->
                             if (screenState == ListScreenState.SelectOrDrag) {
                                 screenState = ListScreenState.Dragging
+                                dragY += dragAmount.y
+                                println("dragY: $dragY")
                                 selectedItems.clear()
                                 // TODO: update item position
                             } else if (screenState == ListScreenState.Dragging) {
                                 // TODO: update item position
+                                dragY += dragAmount.y
+                                println("dragY: $dragY")
                             }
                         },
                         onDragEnd = {
@@ -322,8 +330,8 @@ fun ListDetailScreen(
 private fun ItemCard(
     item: ItemEntity,
     onTap: () -> Unit,
-    onLongPress: () -> Unit,
-    onDrag: () -> Unit,
+    onLongPress: (offset: Offset) -> Unit,
+    onDrag: (dragAmount: Offset) -> Unit,
     onDragEnd: () -> Unit,
     isSelected: Boolean = false,
     modifier: Modifier = Modifier
@@ -344,10 +352,10 @@ private fun ItemCard(
             .pointerInput(item.id) {
                 detectDragGesturesAfterLongPress(
                     onDragStart = { offset ->
-                        onLongPress()
+                        onLongPress(offset)
                     },
                     onDrag = { change, dragAmount ->
-                        onDrag()
+                        onDrag(dragAmount)
                     },
                     onDragEnd = {
                         onDragEnd()
