@@ -1,7 +1,6 @@
 package com.coreo.listbox.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,6 +12,8 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -37,15 +38,31 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.coreo.listbox.components.RenameListDialog
 import com.coreo.listbox.database.ItemEntity
 import com.coreo.listbox.di.ServiceLocator
 import com.coreo.listbox.viewmodel.ListDetailViewModel
+
+//sealed class ListScreenStateEnriched {
+//    object Base : ListScreenStateEnriched()
+//    data class SelectOrDrag(val selectedId: String) : ListScreenStateEnriched()
+//    data class MultiSelect(val selectedIds: Set<String>) : ListScreenStateEnriched()
+//    data class Dragging(val draggedId: String, val currentIndex: Int) : ListScreenStateEnriched()
+//}
+
+enum class ListScreenState {
+    Base,
+    SelectOrDrag,
+    MultiSelect,
+    Dragging
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,14 +75,29 @@ fun ListDetailScreen(
     val viewModel = remember { ListDetailViewModel(repository, listId) }
     val items by viewModel.items.collectAsState()
     val list by viewModel.list.collectAsState()
-    val isMultiSelectMode by viewModel.isMultiSelectMode.collectAsState()
-    val selectedItems by viewModel.selectedItems.collectAsState()
+//    val isMultiSelectMode by viewModel.isMultiSelectMode.collectAsState()
+//    val selectedItems by viewModel.selectedItems.collectAsState()
     val listTitle = list?.title ?: "List"
     var showOverflowMenu by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showDeleteSelectedDialog by remember { mutableStateOf(false) }
     var showRenameDialog by remember { mutableStateOf(false) }
     var showAddItemSheet by remember { mutableStateOf(false) }
+
+    var screenState by remember { mutableStateOf(ListScreenState.Base) }
+    val selectedItems = remember { mutableStateSetOf<String>() }
+
+    fun toggleItemSelection(item: ItemEntity) {
+        if (selectedItems.contains(item.id)) {
+            selectedItems.remove(item.id)
+            if (selectedItems.isEmpty()) {
+                screenState = ListScreenState.Base
+            }
+        } else {
+            selectedItems.add(item.id)
+        }
+    }
+
 
     if (showRenameDialog) {
         RenameListDialog(
@@ -134,15 +166,15 @@ fun ListDetailScreen(
         },
         topBar = {
             AnimatedContent(
-                targetState = isMultiSelectMode,
+                targetState = selectedItems.isNotEmpty(),
                 transitionSpec = {
                     // Pure fade with mini-scale: minimalist transition
                     (fadeIn(animationSpec = tween(300)) + scaleIn(initialScale = 0.95f)) togetherWith
                         (fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.95f))
                 },
                 label = "TopAppBarTransition"
-            ) { multiSelectActive ->
-            if (multiSelectActive) {
+            ) { hasSelection ->
+            if (hasSelection) {
                 TopAppBar(
                     title = {
                         val count = selectedItems.size
@@ -152,7 +184,10 @@ fun ListDetailScreen(
                         )
                     },
                     navigationIcon = {
-                        IconButton(onClick = { viewModel.exitMultiSelect() }) {
+                        IconButton(onClick = {
+                            screenState = ListScreenState.Base
+                            selectedItems.clear()
+                        }) {
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = "Exit multi-select"
@@ -242,13 +277,38 @@ fun ListDetailScreen(
                     ItemCard(
                         item = item,
                         isSelected = selectedItems.contains(item.id),
-                        onClick = {
-                            if (isMultiSelectMode) viewModel.toggleItemSelection(item.id)
-                            else onItemNavigate(item.id)
+                        onTap = {
+                            if (screenState == ListScreenState.Base) {
+                                onItemNavigate(item.id)
+                            } else if (screenState == ListScreenState.MultiSelect) {
+                                toggleItemSelection(item)
+                            }
                         },
-                        onLongClick = {
-                            if (isMultiSelectMode) viewModel.toggleItemSelection(item.id)
-                            else viewModel.enterMultiSelect(item.id)
+                        onLongPress = {
+                            if (screenState == ListScreenState.Base) {
+                                screenState = ListScreenState.SelectOrDrag
+                                toggleItemSelection(item)
+                            } else if (screenState == ListScreenState.MultiSelect) {
+                                toggleItemSelection(item)
+                            }
+//                            if (isMultiSelectMode) viewModel.toggleItemSelection(item.id)
+//                            else viewModel.enterMultiSelect(item.id)
+                        },
+                        onDrag = {
+                            if (screenState == ListScreenState.SelectOrDrag) {
+                                screenState = ListScreenState.Dragging
+                                selectedItems.clear()
+                                // TODO: update item position
+                            } else if (screenState == ListScreenState.Dragging) {
+                                // TODO: update item position
+                            }
+                        },
+                        onDragEnd = {
+                            if (screenState === ListScreenState.SelectOrDrag) {
+                                screenState = ListScreenState.MultiSelect
+                            } else if (screenState == ListScreenState.Dragging) {
+                                screenState = ListScreenState.Base
+                            }
                         }
                     )
                 }
@@ -261,8 +321,10 @@ fun ListDetailScreen(
 @Composable
 private fun ItemCard(
     item: ItemEntity,
-    onClick: () -> Unit,
-    onLongClick: () -> Unit,
+    onTap: () -> Unit,
+    onLongPress: () -> Unit,
+    onDrag: () -> Unit,
+    onDragEnd: () -> Unit,
     isSelected: Boolean = false,
     modifier: Modifier = Modifier
 ) {
@@ -270,10 +332,28 @@ private fun ItemCard(
         modifier = modifier
             .fillMaxSize()
             .padding(vertical = 8.dp)
-            .combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongClick
-            ),
+//            .combinedClickable(
+//                onClick = { onClick() },
+//                onLongClick = { onLongClick() }
+//            ),
+            .pointerInput(item.id) {
+                detectTapGestures(
+                    onTap = { onTap() },
+                )
+            }
+            .pointerInput(item.id) {
+                detectDragGesturesAfterLongPress(
+                    onDragStart = { offset ->
+                        onLongPress()
+                    },
+                    onDrag = { change, dragAmount ->
+                        onDrag()
+                    },
+                    onDragEnd = {
+                        onDragEnd()
+                    }
+                )
+            },
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected)
                 MaterialTheme.colorScheme.primaryContainer
