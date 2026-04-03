@@ -98,10 +98,10 @@ class ListDetailViewModel(
 
     private fun saveOrderedItems() {
         viewModelScope.launch {
-            _orderedItems.value.forEachIndexed { index, item ->
-                // TODO: update all items in one query
-                repository.reorderItem(item.id, index.toDouble())
+            val orderUpdates = _orderedItems.value.mapIndexed { index, item ->
+                item.id to index.toDouble()
             }
+            repository.reorderItems(orderUpdates)
         }
     }
 

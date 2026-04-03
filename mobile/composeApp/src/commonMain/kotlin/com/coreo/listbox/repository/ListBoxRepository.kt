@@ -101,6 +101,21 @@ class ListBoxRepository(private val database: ListBoxDatabase) {
     }
 
     /**
+     * Batch update orderIndex for multiple items in a single transaction
+     */
+    suspend fun reorderItems(orderUpdates: List<Pair<String, Double>>) {
+        if (orderUpdates.isEmpty()) return
+        database.transaction {
+            orderUpdates.forEach { (itemId, newOrderIndex) ->
+                database.itemEntityQueries.updateItemOrderIndex(
+                    orderIndex = newOrderIndex,
+                    id = itemId
+                )
+            }
+        }
+    }
+
+    /**
      * Get all items for a specific list as a reactive Flow, sorted by orderIndex
      */
     fun getItemsForList(listId: String): Flow<List<ItemEntity>> {

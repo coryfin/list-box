@@ -49,3 +49,4 @@ WHERE id = ?;
 getMaxOrderIndex:
 SELECT MAX(orderIndex) FROM itemEntity
 WHERE listId = ?;
+
