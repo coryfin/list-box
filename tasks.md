@@ -312,12 +312,12 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 - [x] Update UI (remove deleted items from list)
 - [x] Test deletion works for multiple items
 
-### 7.5 Implement Multi-Select Exit [LIST-43]
+### 7.5 Implement Multi-Select Exit [LIST-43] ✅ COMPLETED
 
-- [ ] Tapping close icon (X) exits multi-select mode
-- [ ] Clear selected items set
-- [ ] Restore standard top app bar
-- [ ] Test clean exit behavior
+- [x] Tapping close icon (X) exits multi-select mode
+- [x] Clear selected items set
+- [x] Restore standard top app bar
+- [x] Test clean exit behavior
 
 ---
 
