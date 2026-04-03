@@ -75,26 +75,23 @@ fun ListDetailScreen(
 ) {
     val repository = remember { ServiceLocator.getRepository() }
     val viewModel = remember { ListDetailViewModel(repository, listId) }
-//    val items by viewModel.items.collectAsState()
     val list by viewModel.list.collectAsState()
-//    val isMultiSelectMode by viewModel.isMultiSelectMode.collectAsState()
-//    val selectedItems by viewModel.selectedItems.collectAsState()
     val listTitle = list?.title ?: "List"
     var showOverflowMenu by remember { mutableStateOf(false) }
-    var showDeleteDialog by remember { mutableStateOf(false) }
-    var showDeleteSelectedDialog by remember { mutableStateOf(false) }
-    var showRenameDialog by remember { mutableStateOf(false) }
+    var showDeleteListDialog by remember { mutableStateOf(false) }
+    var showDeleteItemsDialog by remember { mutableStateOf(false) }
+    var showRenameListDialog by remember { mutableStateOf(false) }
     var showAddItemSheet by remember { mutableStateOf(false) }
 
     var screenState by remember { mutableStateOf(ListScreenState.Base) }
     val selectedItems = remember { mutableStateSetOf<String>() }
 
     val dbItems by viewModel.items.collectAsState()
-    var items by remember { mutableStateOf(dbItems) }
+    var orderedItems by remember { mutableStateOf(dbItems) }
 
     LaunchedEffect(dbItems) {
         if (screenState == ListScreenState.Base) {
-            items = dbItems
+            orderedItems = dbItems
         }
     }
 
@@ -105,7 +102,7 @@ fun ListDetailScreen(
             selectedItems.clear()
         }
         // Update the list
-        items = items.toMutableList().apply {
+        orderedItems = orderedItems.toMutableList().apply {
             add(to.index, removeAt(from.index))
         }
     }
@@ -122,15 +119,15 @@ fun ListDetailScreen(
     }
 
 
-    if (showRenameDialog) {
+    if (showRenameListDialog) {
         RenameListDialog(
             currentTitle = listTitle,
-            onDismiss = { showRenameDialog = false },
+            onDismiss = { showRenameListDialog = false },
             onRename = { newTitle -> viewModel.updateListTitle(newTitle) }
         )
     }
 
-    if (showDeleteSelectedDialog) {
+    if (showDeleteItemsDialog) {
         DeleteSelectionDialog(
             itemCount = selectedItems.size,
             onConfirm = {
@@ -140,20 +137,20 @@ fun ListDetailScreen(
                 viewModel.deleteSelectedItems()
                 selectedItems.clear()
                 screenState = ListScreenState.Base
-                showDeleteSelectedDialog = false
+                showDeleteItemsDialog = false
             },
-            onDismiss = { showDeleteSelectedDialog = false }
+            onDismiss = { showDeleteItemsDialog = false }
         )
     }
 
-    if (showDeleteDialog) {
+    if (showDeleteListDialog) {
         AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
+            onDismissRequest = { showDeleteListDialog = false },
             title = { Text("Delete list?") },
             text = { Text("\"$listTitle\" and all its items will be permanently deleted.") },
             confirmButton = {
                 TextButton(onClick = {
-                    showDeleteDialog = false
+                    showDeleteListDialog = false
                     viewModel.deleteList()
                     onBackClick()
                 }) {
@@ -161,7 +158,7 @@ fun ListDetailScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
+                TextButton(onClick = { showDeleteListDialog = false }) {
                     Text("Cancel")
                 }
             }
@@ -187,84 +184,84 @@ fun ListDetailScreen(
                 transitionSpec = {
                     // Pure fade with mini-scale: minimalist transition
                     (fadeIn(animationSpec = tween(300)) + scaleIn(initialScale = 0.95f)) togetherWith
-                        (fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.95f))
+                            (fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.95f))
                 },
                 label = "TopAppBarTransition"
             ) { hasSelection ->
-            if (hasSelection) {
-                TopAppBar(
-                    title = {
-                        val count = selectedItems.size
-                        Text(
-                            text = if (count == 1) "1 item selected" else "$count items selected",
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = {
-                            screenState = ListScreenState.Base
-                            selectedItems.clear()
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Exit multi-select"
+                if (hasSelection) {
+                    TopAppBar(
+                        title = {
+                            val count = selectedItems.size
+                            Text(
+                                text = if (count == 1) "1 item selected" else "$count items selected",
+                                style = MaterialTheme.typography.titleLarge
                             )
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = {
+                                screenState = ListScreenState.Base
+                                selectedItems.clear()
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Exit multi-select"
+                                )
+                            }
+                        },
+                        actions = {
+                            IconButton(onClick = { showDeleteItemsDialog = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Delete selected items"
+                                )
+                            }
                         }
-                    },
-                    actions = {
-                        IconButton(onClick = { showDeleteSelectedDialog = true }) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete selected items"
+                    )
+                } else {
+                    TopAppBar(
+                        title = {
+                            Text(
+                                text = listTitle,
+                                style = MaterialTheme.typography.titleLarge
                             )
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = onBackClick) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Back"
+                                )
+                            }
+                        },
+                        actions = {
+                            IconButton(onClick = { showOverflowMenu = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.MoreVert,
+                                    contentDescription = "More options"
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = showOverflowMenu,
+                                onDismissRequest = { showOverflowMenu = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Rename") },
+                                    onClick = {
+                                        showOverflowMenu = false
+                                        showRenameListDialog = true
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Delete") },
+                                    onClick = {
+                                        showOverflowMenu = false
+                                        showDeleteListDialog = true
+                                    }
+                                )
+                            }
                         }
-                    }
-                )
-            } else {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = listTitle,
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onBackClick) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back"
-                            )
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = { showOverflowMenu = true }) {
-                            Icon(
-                                imageVector = Icons.Default.MoreVert,
-                                contentDescription = "More options"
-                            )
-                        }
-                        DropdownMenu(
-                            expanded = showOverflowMenu,
-                            onDismissRequest = { showOverflowMenu = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text("Rename") },
-                                onClick = {
-                                    showOverflowMenu = false
-                                    showRenameDialog = true
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Delete") },
-                                onClick = {
-                                    showOverflowMenu = false
-                                    showDeleteDialog = true
-                                }
-                            )
-                        }
-                    }
-                )
-            }
+                    )
+                }
             } // end AnimatedContent
         }
     ) { paddingValues ->
@@ -278,7 +275,7 @@ fun ListDetailScreen(
             )
         }
 
-        if (items.isEmpty()) {
+        if (orderedItems.isEmpty()) {
             EmptyItemState(
                 modifier = Modifier.padding(paddingValues)
             )
@@ -291,7 +288,7 @@ fun ListDetailScreen(
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 horizontalAlignment = Alignment.Start
             ) {
-                items(items, key = { it.id }) { item ->
+                items(orderedItems, key = { it.id }) { item ->
                     ReorderableItem(
                         state = reorderableLazyListState,
                         key = item.id
@@ -319,7 +316,7 @@ fun ListDetailScreen(
                                     screenState = ListScreenState.MultiSelect
                                 } else if (screenState == ListScreenState.Dragging) {
                                     screenState = ListScreenState.Base
-                                    viewModel.saveOrderedItems(items)
+                                    viewModel.saveOrderedItems(orderedItems)
                                 }
                             },
                             scope = this
