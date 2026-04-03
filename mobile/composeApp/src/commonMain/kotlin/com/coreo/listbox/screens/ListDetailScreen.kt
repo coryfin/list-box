@@ -34,11 +34,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -51,23 +49,10 @@ import com.coreo.listbox.components.RenameListDialog
 import com.coreo.listbox.database.ItemEntity
 import com.coreo.listbox.di.ServiceLocator
 import com.coreo.listbox.viewmodel.ListDetailViewModel
+import com.coreo.listbox.viewmodel.ListInteractionState
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
-
-//sealed class ListScreenStateEnriched {
-//    object Base : ListScreenStateEnriched()
-//    data class SelectOrDrag(val selectedId: String) : ListScreenStateEnriched()
-//    data class MultiSelect(val selectedIds: Set<String>) : ListScreenStateEnriched()
-//    data class Dragging(val draggedId: String, val currentIndex: Int) : ListScreenStateEnriched()
-//}
-
-enum class ListScreenState {
-    Base,
-    SelectOrDrag,
-    MultiSelect,
-    Dragging
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,41 +71,14 @@ fun ListDetailScreen(
     var showRenameListDialog by remember { mutableStateOf(false) }
     var showAddItemSheet by remember { mutableStateOf(false) }
 
-    var screenState by remember { mutableStateOf(ListScreenState.Base) }
-    val selectedItems = remember { mutableStateSetOf<String>() }
-
-    val dbItems by viewModel.items.collectAsState()
-    var orderedItems by remember { mutableStateOf(dbItems) }
-
-    LaunchedEffect(dbItems) {
-        if (screenState == ListScreenState.Base) {
-            orderedItems = dbItems
-        }
-    }
+    val listInteractionState by viewModel.listInteractionState.collectAsState()
+    val selectedItemIds by viewModel.selectedItemIds.collectAsState()
+    val orderedItems by viewModel.orderedItems.collectAsState()
 
     val lazyListState = rememberLazyListState()
     val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
-        if (screenState == ListScreenState.SelectOrDrag) {
-            screenState = ListScreenState.Dragging
-            selectedItems.clear()
-        }
-        // Update the list
-        orderedItems = orderedItems.toMutableList().apply {
-            add(to.index, removeAt(from.index))
-        }
+        viewModel.onItemMoved(from.index, to.index)
     }
-
-    fun toggleItemSelection(item: ItemEntity) {
-        if (selectedItems.contains(item.id)) {
-            selectedItems.remove(item.id)
-            if (selectedItems.isEmpty()) {
-                screenState = ListScreenState.Base
-            }
-        } else {
-            selectedItems.add(item.id)
-        }
-    }
-
 
     if (showRenameListDialog) {
         RenameListDialog(
@@ -132,14 +90,9 @@ fun ListDetailScreen(
 
     if (showDeleteItemsDialog) {
         DeleteItemsDialog(
-            itemCount = selectedItems.size,
+            itemCount = selectedItemIds.size,
             onConfirm = {
-                for (itemId in selectedItems) {
-                    viewModel.toggleItemSelection(itemId)
-                }
                 viewModel.deleteSelectedItems()
-                selectedItems.clear()
-                screenState = ListScreenState.Base
                 showDeleteItemsDialog = false
             },
             onDismiss = { showDeleteItemsDialog = false }
@@ -173,9 +126,8 @@ fun ListDetailScreen(
         },
         topBar = {
             AnimatedContent(
-                targetState = selectedItems.isNotEmpty(),
+                targetState = selectedItemIds.isNotEmpty(),
                 transitionSpec = {
-                    // Pure fade with mini-scale: minimalist transition
                     (fadeIn(animationSpec = tween(300)) + scaleIn(initialScale = 0.95f)) togetherWith
                             (fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.95f))
                 },
@@ -184,20 +136,17 @@ fun ListDetailScreen(
                 if (hasSelection) {
                     TopAppBar(
                         title = {
-                            val count = selectedItems.size
+                            val count = selectedItemIds.size
                             Text(
                                 text = if (count == 1) "1 item selected" else "$count items selected",
                                 style = MaterialTheme.typography.titleLarge
                             )
                         },
                         navigationIcon = {
-                            IconButton(onClick = {
-                                screenState = ListScreenState.Base
-                                selectedItems.clear()
-                            }) {
+                            IconButton(onClick = { viewModel.exitMultiSelect() }) {
                                 Icon(
                                     imageVector = Icons.Default.Close,
-                                    contentDescription = "Exit multi-select"
+                                    contentDescription = "Clear selection"
                                 )
                             }
                         },
@@ -288,30 +237,18 @@ fun ListDetailScreen(
                     ) { isDragging ->
                         ItemCard(
                             item = item,
-                            isSelected = selectedItems.contains(item.id),
+                            isSelected = selectedItemIds.contains(item.id),
                             isDragging = isDragging,
-                            canDrag = screenState != ListScreenState.MultiSelect,
+                            canDrag = listInteractionState != ListInteractionState.MultiSelect,
                             onTap = {
-                                if (screenState == ListScreenState.Base) {
+                                if (listInteractionState == ListInteractionState.Default) {
                                     onItemNavigate(item.id)
-                                } else if (screenState == ListScreenState.MultiSelect) {
-                                    toggleItemSelection(item)
+                                } else if (listInteractionState == ListInteractionState.MultiSelect) {
+                                    viewModel.toggleItemSelection(item.id)
                                 }
                             },
-                            onDragStart = {
-                                if (screenState == ListScreenState.Base) {
-                                    screenState = ListScreenState.SelectOrDrag
-                                    toggleItemSelection(item)
-                                }
-                            },
-                            onDragEnd = {
-                                if (screenState == ListScreenState.SelectOrDrag) {
-                                    screenState = ListScreenState.MultiSelect
-                                } else if (screenState == ListScreenState.Dragging) {
-                                    screenState = ListScreenState.Base
-                                    viewModel.saveOrderedItems(orderedItems)
-                                }
-                            },
+                            onDragStart = { viewModel.onDragStarted(item.id) },
+                            onDragEnd = { viewModel.onDragEnded() },
                             scope = this
                         )
                     }
@@ -383,4 +320,3 @@ fun EmptyListState(modifier: Modifier = Modifier) {
         )
     }
 }
-
