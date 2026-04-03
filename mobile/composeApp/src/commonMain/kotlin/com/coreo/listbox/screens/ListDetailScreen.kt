@@ -93,12 +93,18 @@ fun ListDetailScreen(
     var items by remember { mutableStateOf(dbItems) }
 
     LaunchedEffect(dbItems) {
-        // TODO: don't do this if dragging
-        items = dbItems
+        if (screenState == ListScreenState.Base) {
+            items = dbItems
+        }
     }
 
     val lazyListState = rememberLazyListState()
     val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
+        println("reorder: ${from.index} -> ${to.index}")
+        if (screenState == ListScreenState.SelectOrDrag) {
+            screenState = ListScreenState.Dragging
+            selectedItems.clear()
+        }
         // Update the list
         items = items.toMutableList().apply {
             add(to.index, removeAt(from.index))
@@ -133,8 +139,13 @@ fun ListDetailScreen(
             text = { Text("This action cannot be undone.") },
             confirmButton = {
                 TextButton(onClick = {
-                    showDeleteSelectedDialog = false
+                    for (itemId in selectedItems) {
+                        viewModel.toggleItemSelection(itemId)
+                    }
                     viewModel.deleteSelectedItems()
+                    selectedItems.clear()
+                    screenState = ListScreenState.Base
+                    showDeleteSelectedDialog = false
                 }) {
                     Text("Delete")
                 }
@@ -301,6 +312,7 @@ fun ListDetailScreen(
                             item = item,
                             isSelected = selectedItems.contains(item.id),
                             isDragging = isDragging,
+                            canDrag = screenState != ListScreenState.MultiSelect,
                             onTap = {
                                 if (screenState == ListScreenState.Base) {
                                     onItemNavigate(item.id)
@@ -308,8 +320,19 @@ fun ListDetailScreen(
                                     toggleItemSelection(item)
                                 }
                             },
+                            onDragStart = {
+                                if (screenState == ListScreenState.Base) {
+                                    screenState = ListScreenState.SelectOrDrag
+                                    toggleItemSelection(item)
+                                }
+                            },
                             onDragEnd = {
-                                viewModel.saveOrderedItems(items)
+                                if (screenState == ListScreenState.SelectOrDrag) {
+                                    screenState = ListScreenState.MultiSelect
+                                } else if (screenState == ListScreenState.Dragging) {
+                                    screenState = ListScreenState.Base
+                                    viewModel.saveOrderedItems(items)
+                                }
                             },
                             scope = this
                         )
@@ -324,9 +347,11 @@ fun ListDetailScreen(
 @Composable
 private fun ItemCard(
     item: ItemEntity,
-    isSelected: Boolean = false,
-    isDragging: Boolean = false,
+    isSelected: Boolean,
+    isDragging: Boolean,
+    canDrag: Boolean,
     onTap: () -> Unit,
+    onDragStart: () -> Unit,
     onDragEnd: () -> Unit,
     scope: ReorderableCollectionItemScope
 ) {
@@ -334,7 +359,11 @@ private fun ItemCard(
         onClick = onTap,
         modifier = with(scope) {
             Modifier
-                .longPressDraggableHandle(onDragStopped = onDragEnd)
+                .longPressDraggableHandle(
+                    enabled = canDrag,
+                    onDragStarted = { onDragStart() },
+                    onDragStopped = onDragEnd
+                )
                 .fillMaxSize()
                 .padding(vertical = 8.dp)
         },
