@@ -1,5 +1,6 @@
 package com.coreo.listbox.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -7,11 +8,14 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +32,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.coreo.listbox.components.CreateListDialog
 import com.coreo.listbox.database.ListEntity
@@ -35,6 +40,9 @@ import com.coreo.listbox.di.ServiceLocator
 import com.coreo.listbox.util.formatDateForListCard
 import com.coreo.listbox.viewmodel.HomeViewModel
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.painterResource
+import listbox.composeapp.generated.resources.Res
+import listbox.composeapp.generated.resources.listbox_banner_logo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,11 +72,14 @@ fun HomeScreen(
     
     Scaffold(
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
-                    Text(
-                        text = "ListBox",
-                        style = MaterialTheme.typography.headlineSmall
+                    Image(
+                        painter = painterResource(Res.drawable.listbox_banner_logo),
+                        contentDescription = "ListBox Banner",
+                        modifier = Modifier
+                            .height(40.dp),
+                        contentScale = ContentScale.Inside
                     )
                 }
             )
