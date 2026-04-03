@@ -128,7 +128,7 @@ fun ListDetailScreen(
     }
 
     if (showDeleteItemsDialog) {
-        DeleteSelectionDialog(
+        DeleteItemsDialog(
             itemCount = selectedItems.size,
             onConfirm = {
                 for (itemId in selectedItems) {
@@ -144,24 +144,14 @@ fun ListDetailScreen(
     }
 
     if (showDeleteListDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteListDialog = false },
-            title = { Text("Delete list?") },
-            text = { Text("\"$listTitle\" and all its items will be permanently deleted.") },
-            confirmButton = {
-                TextButton(onClick = {
-                    showDeleteListDialog = false
-                    viewModel.deleteList()
-                    onBackClick()
-                }) {
-                    Text("Delete")
-                }
+        DeleteListDialog(
+            listTitle = listTitle,
+            onConfirm = {
+                showDeleteListDialog = false
+                viewModel.deleteList()
+                onBackClick()
             },
-            dismissButton = {
-                TextButton(onClick = { showDeleteListDialog = false }) {
-                    Text("Cancel")
-                }
-            }
+            onDismiss = { showDeleteListDialog = false }
         )
     }
 
@@ -369,7 +359,7 @@ private fun ItemCard(
 }
 
 @Composable
-private fun DeleteSelectionDialog(
+private fun DeleteItemsDialog(
     itemCount: Int,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
@@ -378,6 +368,29 @@ private fun DeleteSelectionDialog(
         onDismissRequest = onDismiss,
         title = { Text(if (itemCount == 1) "Delete 1 item?" else "Delete $itemCount items?") },
         text = { Text("This action cannot be undone.") },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text("Delete")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+private fun DeleteListDialog(
+    listTitle: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Delete list?") },
+        text = { Text("\"$listTitle\" and all its items will be permanently deleted.") },
         confirmButton = {
             TextButton(onClick = onConfirm) {
                 Text("Delete")
