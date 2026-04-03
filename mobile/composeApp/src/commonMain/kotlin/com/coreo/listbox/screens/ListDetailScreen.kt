@@ -100,7 +100,6 @@ fun ListDetailScreen(
 
     val lazyListState = rememberLazyListState()
     val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
-        println("reorder: ${from.index} -> ${to.index}")
         if (screenState == ListScreenState.SelectOrDrag) {
             screenState = ListScreenState.Dragging
             selectedItems.clear()
@@ -132,29 +131,18 @@ fun ListDetailScreen(
     }
 
     if (showDeleteSelectedDialog) {
-        val count = selectedItems.size
-        AlertDialog(
-            onDismissRequest = { showDeleteSelectedDialog = false },
-            title = { Text(if (count == 1) "Delete 1 item?" else "Delete $count items?") },
-            text = { Text("This action cannot be undone.") },
-            confirmButton = {
-                TextButton(onClick = {
-                    for (itemId in selectedItems) {
-                        viewModel.toggleItemSelection(itemId)
-                    }
-                    viewModel.deleteSelectedItems()
-                    selectedItems.clear()
-                    screenState = ListScreenState.Base
-                    showDeleteSelectedDialog = false
-                }) {
-                    Text("Delete")
+        DeleteSelectionDialog(
+            itemCount = selectedItems.size,
+            onConfirm = {
+                for (itemId in selectedItems) {
+                    viewModel.toggleItemSelection(itemId)
                 }
+                viewModel.deleteSelectedItems()
+                selectedItems.clear()
+                screenState = ListScreenState.Base
+                showDeleteSelectedDialog = false
             },
-            dismissButton = {
-                TextButton(onClick = { showDeleteSelectedDialog = false }) {
-                    Text("Cancel")
-                }
-            }
+            onDismiss = { showDeleteSelectedDialog = false }
         )
     }
 
@@ -381,5 +369,28 @@ private fun ItemCard(
             modifier = Modifier.padding(16.dp)
         )
     }
+}
+
+@Composable
+private fun DeleteSelectionDialog(
+    itemCount: Int,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(if (itemCount == 1) "Delete 1 item?" else "Delete $itemCount items?") },
+        text = { Text("This action cannot be undone.") },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text("Delete")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
