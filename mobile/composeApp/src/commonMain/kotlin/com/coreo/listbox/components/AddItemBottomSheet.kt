@@ -1,4 +1,4 @@
-package com.coreo.listbox.screens
+package com.coreo.listbox.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
