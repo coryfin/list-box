@@ -421,9 +421,21 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 
 ## Phase 10: Polish & Finalization
 
+### 10.0 Add Placeholder Illustrations [LIST-69] ✅ COMPLETED
+
+- [x] Design/generate placeholder illustrations for empty states
+- [x] Create illustration for Home Screen empty state (no lists)
+- [x] Create illustration for List Detail empty state (no items)
+- [x] Export assets with appropriate sizes (PNG/SVG)
+- [x] Create `EmptyStateIllustration` composable for reuse
+- [x] Integrate into HomeScreen empty state
+- [x] Integrate into ListDetailScreen empty state
+- [x] Verify Material 3 design alignment
+- [x] Test on both iOS and Android
+
 ### 10.1 Visual Polish [LIST-60]
 
-- [ ] Refine Material 3 color schemes for light/dark mode
+- [x] Refine Material 3 color schemes for light/dark mode
 - [ ] Ensure consistent spacing and typography
 - [ ] Add subtle animations for transitions
 - [ ] Test visual hierarchy is clear

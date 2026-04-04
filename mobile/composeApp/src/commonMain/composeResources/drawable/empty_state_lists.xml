@@ -1,0 +1,38 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="160dp"
+    android:height="130dp"
+    android:viewportWidth="160"
+    android:viewportHeight="130">
+
+    <!-- Card -->
+    <path
+        android:pathData="M30,12 L130,12 A16,16,0,0,1,146,28 L146,102 A16,16,0,0,1,130,118 L30,118 A16,16,0,0,1,14,102 L14,28 A16,16,0,0,1,30,12 Z"
+        android:fillColor="#F3F8FF"
+        android:strokeColor="#AECDE8"
+        android:strokeWidth="3"/>
+
+    <!-- Title line -->
+    <path
+        android:pathData="M30,38 L130,38"
+        android:strokeColor="#92BAD8"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"/>
+
+    <!-- Body lines -->
+    <path
+        android:pathData="M30,58 L116,58"
+        android:strokeColor="#BDDAEE"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"/>
+    <path
+        android:pathData="M30,74 L124,74"
+        android:strokeColor="#BDDAEE"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"/>
+    <path
+        android:pathData="M30,90 L100,90"
+        android:strokeColor="#BDDAEE"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"/>
+
+</vector>

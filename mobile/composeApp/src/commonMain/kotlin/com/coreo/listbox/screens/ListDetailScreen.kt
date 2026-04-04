@@ -10,7 +10,9 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -39,10 +41,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.Image
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.coreo.listbox.components.AddItemBottomSheet
+import org.jetbrains.compose.resources.painterResource
+import listbox.composeapp.generated.resources.Res
+import listbox.composeapp.generated.resources.empty_state_items
 import com.coreo.listbox.components.DeleteItemsDialog
 import com.coreo.listbox.components.DeleteListDialog
 import com.coreo.listbox.components.RenameListDialog
@@ -302,9 +308,17 @@ fun EmptyListState(modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxSize()
             .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier = Modifier.weight(1f))
+        Image(
+            painter = painterResource(Res.drawable.empty_state_items),
+            contentDescription = null,
+            modifier = Modifier
+                .height(160.dp)
+                .padding(bottom = 24.dp)
+        )
         Text(
             text = "Your list is empty.",
             style = MaterialTheme.typography.headlineSmall,
@@ -316,5 +330,6 @@ fun EmptyListState(modifier: Modifier = Modifier) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 12.dp)
         )
+        Spacer(modifier = Modifier.weight(2f))
     }
 }

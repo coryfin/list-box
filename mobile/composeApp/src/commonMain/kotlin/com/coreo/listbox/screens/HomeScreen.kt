@@ -41,6 +41,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import listbox.composeapp.generated.resources.Res
 import listbox.composeapp.generated.resources.listbox_banner_logo
+import listbox.composeapp.generated.resources.empty_state_lists
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -143,6 +144,13 @@ private fun EmptyListState(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Image(
+            painter = painterResource(Res.drawable.empty_state_lists),
+            contentDescription = null,
+            modifier = Modifier
+                .height(160.dp)
+                .padding(bottom = 24.dp)
+        )
         Text(
             text = "Your lists are empty.",
             style = MaterialTheme.typography.headlineSmall,
