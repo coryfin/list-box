@@ -44,7 +44,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import com.coreo.listbox.database.ItemEntity
 import com.coreo.listbox.di.ServiceLocator
 import com.coreo.listbox.viewmodel.ItemDetailViewModel
 

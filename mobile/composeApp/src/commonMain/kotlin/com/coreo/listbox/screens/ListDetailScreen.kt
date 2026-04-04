@@ -115,12 +115,10 @@ fun ListDetailScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showAddItemSheet = true },
-                containerColor = MaterialTheme.colorScheme.primary
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Add item",
-                    tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
         },
