@@ -99,7 +99,7 @@ class ListDetailViewModel(
     private fun saveOrderedItems() {
         viewModelScope.launch {
             val orderUpdates = _orderedItems.value.mapIndexed { index, item ->
-                item.id to index.toDouble()
+                item.id to index.toLong()
             }
             repository.reorderItems(orderUpdates)
         }

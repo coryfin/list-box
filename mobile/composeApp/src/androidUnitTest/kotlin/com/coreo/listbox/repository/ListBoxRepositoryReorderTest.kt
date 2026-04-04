@@ -57,12 +57,12 @@ class ListBoxRepositoryReorderTest {
         val itemB = items.first { it.title == "Item B" }
 
         // Move Item B before Item A using a lower orderIndex
-        repository.reorderItem(itemB.id, 0.5)
+        repository.reorderItem(itemB.id, 0L)
 
         val reordered = database.itemEntityQueries.getItemsByListId(list.id).executeAsList()
         assertEquals("Item B", reordered[0].title)
         assertEquals("Item A", reordered[1].title)
-        assertEquals(0.5, reordered[0].orderIndex, 0.0001)
+        assertEquals(0L, reordered[0].orderIndex)
     }
 
     @Test
@@ -75,9 +75,9 @@ class ListBoxRepositoryReorderTest {
         repository.createItem(list.id, "Item C", null)
 
         val items = database.itemEntityQueries.getItemsByListId(list.id).executeAsList()
-        // Items: A(1.0), B(2.0), C(3.0). Move C between A and B using midpoint 1.5
+        // Items: A(1L), B(2L), C(3L). Move C between A and B using index 1
         val itemC = items.first { it.title == "Item C" }
-        repository.reorderItem(itemC.id, 1.5)
+        repository.reorderItem(itemC.id, 1L)
 
         val reordered = database.itemEntityQueries.getItemsByListId(list.id).executeAsList()
         assertEquals("Item A", reordered[0].title)
@@ -97,9 +97,9 @@ class ListBoxRepositoryReorderTest {
         val itemA = items.first { it.title == "Item A" }
         val originalIndexB = items.first { it.title == "Item B" }.orderIndex
 
-        repository.reorderItem(itemA.id, 5.0)
+        repository.reorderItem(itemA.id, 5L)
 
         val updated = database.itemEntityQueries.getItemsByListId(list.id).executeAsList()
-        assertEquals(originalIndexB, updated.first { it.title == "Item B" }.orderIndex, 0.0001)
+        assertEquals(originalIndexB, updated.first { it.title == "Item B" }.orderIndex)
     }
 }

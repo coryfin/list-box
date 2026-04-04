@@ -323,6 +323,16 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 
 ## Phase 8: List Detail Screen - Drag-and-Drop Reordering
 
+### 8.0 Change Order Index to Integer [LIST-71] ✅ COMPLETED
+
+- [x] Update SQLDelight schema: change `orderIndex` from `REAL` to `INTEGER`
+- [x] Update all type references in generated code (Double → Long)
+- [x] Update plan.md to reflect INTEGER type in data model table
+- [x] Update ListBoxRepository to use Long instead of Double
+- [x] Update ListDetailViewModel to convert indices to Long
+- [x] Update unit tests to use integer values
+- [x] Test database initialization with new schema
+
 ### 8.1 Implement Reorder Database Query (SQLDelight) [LIST-45] ✅ COMPLETED
 
 - [x] Write query to update item `orderIndex` value
@@ -350,9 +360,9 @@ This document breaks down the ListBox app into small, executable tasks. Each tas
 
 ### 8.5 Implement Fractional Index Calculation [LIST-49]
 
-- [ ] Calculate midpoint value between two items for drop position
+- [ ] Calculate next sequential index for drop position
 - [ ] Handle edge cases (drag to top, drag to bottom)
-- [ ] Generate new `orderIndex` value (REAL type)
+- [ ] Generate new `orderIndex` value (INTEGER type)
 - [ ] Test calculation logic
 
 ### 8.6 Implement Immediate Persistence [LIST-50]

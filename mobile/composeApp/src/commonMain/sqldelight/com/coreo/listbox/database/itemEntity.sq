@@ -3,7 +3,7 @@ CREATE TABLE itemEntity (
     listId TEXT NOT NULL,
     title TEXT NOT NULL,
     description TEXT,
-    orderIndex REAL NOT NULL,
+    orderIndex INTEGER NOT NULL,
     FOREIGN KEY(listId) REFERENCES listEntity(id) ON DELETE CASCADE
 );
 

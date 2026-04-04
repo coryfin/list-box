@@ -79,8 +79,8 @@ class ListBoxRepository(private val database: ListBoxDatabase) {
         val maxOrderIndex = database.itemEntityQueries.getMaxOrderIndex(listId)
             .executeAsOneOrNull()
             ?.MAX
-            ?: 0.0
-        val newOrderIndex = maxOrderIndex + 1.0
+            ?: 0L
+        val newOrderIndex = maxOrderIndex + 1L
         database.itemEntityQueries.insertItem(
             id = id,
             listId = listId,
@@ -93,7 +93,7 @@ class ListBoxRepository(private val database: ListBoxDatabase) {
     /**
      * Update the orderIndex of an item for drag-and-drop reordering
      */
-    suspend fun reorderItem(itemId: String, newOrderIndex: Double) {
+    suspend fun reorderItem(itemId: String, newOrderIndex: Long) {
         database.itemEntityQueries.updateItemOrderIndex(
             orderIndex = newOrderIndex,
             id = itemId
@@ -103,7 +103,7 @@ class ListBoxRepository(private val database: ListBoxDatabase) {
     /**
      * Batch update orderIndex for multiple items in a single transaction
      */
-    suspend fun reorderItems(orderUpdates: List<Pair<String, Double>>) {
+    suspend fun reorderItems(orderUpdates: List<Pair<String, Long>>) {
         if (orderUpdates.isEmpty()) return
         database.transaction {
             orderUpdates.forEach { (itemId, newOrderIndex) ->

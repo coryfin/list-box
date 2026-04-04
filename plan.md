@@ -42,7 +42,7 @@ Uses **UUID v4** for primary keys and **Fractional Indexing** for item reorderin
 | **listId**      | `TEXT`    | `NOT NULL`    | Foreign Key to `listEntity(id)`.  |
 | **title**       | `TEXT`    | `NOT NULL`    | Primary text (Max 100 chars).     |
 | **description** | `TEXT`    | `NULLABLE`    | Detailed notes (Max 5,000 chars). |
-| **orderIndex**  | `REAL`    | `NOT NULL`    | **Fractional Indexing** value.    |
+| **orderIndex**  | `INTEGER` | `NOT NULL`    | Sequential index. All items are updated on reorder. |
 | **updatedAt**   | `INTEGER` | `NOT NULL`    | Last edit timestamp.              |
 
 
@@ -60,7 +60,7 @@ CREATE INDEX idx_list_created_at ON listEntity(createdAt);
 
 ### 4.1 Fractional Indexing Logic
 
-To support manual reordering without mass-updating rows, `orderIndex` uses `REAL` (floating point) values. Moving an item between two others assigns it the midpoint value. **Drag-and-drop actions trigger an immediate write to the repository** to ensure state durability during movement. Reordering is not managed by the Draft State.
+`orderIndex` uses `INTEGER` (sequential) values. All items in the list are updated whenever a reorder occurs. **Drag-and-drop actions trigger an immediate write to the repository** to ensure state durability during movement. Reordering is not managed by the Draft State.
 
 ### 4.2 Selection & Drag State Machine
 
