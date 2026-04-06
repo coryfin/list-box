@@ -154,7 +154,7 @@ private fun EmptyListState(
                 .padding(bottom = 24.dp)
         )
         Text(
-            text = "Your lists are empty.",
+            text = "No lists yet.",
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurface
         )
@@ -172,7 +172,7 @@ private fun EmptyListState(
                 .fillMaxWidth()
                 .padding(top = 24.dp)
         ) {
-            Text("Blank List")
+            Text("Create a blank List")
         }
         
         // Template Buttons
