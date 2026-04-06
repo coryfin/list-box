@@ -41,7 +41,7 @@ import com.coreo.listbox.viewmodel.HomeViewModel
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import listbox.composeapp.generated.resources.Res
-import listbox.composeapp.generated.resources.empty_state
+import listbox.composeapp.generated.resources.empty_box
 import listbox.composeapp.generated.resources.listbox_banner_logo
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -146,7 +146,7 @@ private fun EmptyListState(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
-            painter = painterResource(Res.drawable.empty_state),
+            painter = painterResource(Res.drawable.empty_box),
             contentDescription = null,
             modifier = Modifier
                 .width(220.dp)
@@ -154,7 +154,7 @@ private fun EmptyListState(
                 .padding(bottom = 24.dp)
         )
         Text(
-            text = "No lists yet.",
+            text = "Your box is empty.",
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurface
         )
