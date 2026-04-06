@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -40,8 +41,8 @@ import com.coreo.listbox.viewmodel.HomeViewModel
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import listbox.composeapp.generated.resources.Res
+import listbox.composeapp.generated.resources.empty_state
 import listbox.composeapp.generated.resources.listbox_banner_logo
-import listbox.composeapp.generated.resources.empty_state_lists
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -145,10 +146,11 @@ private fun EmptyListState(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
-            painter = painterResource(Res.drawable.empty_state_lists),
+            painter = painterResource(Res.drawable.empty_state),
             contentDescription = null,
             modifier = Modifier
-                .height(160.dp)
+                .width(220.dp)
+                .height(230.dp)
                 .padding(bottom = 24.dp)
         )
         Text(
