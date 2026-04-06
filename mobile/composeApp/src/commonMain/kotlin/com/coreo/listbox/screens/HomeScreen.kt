@@ -1,5 +1,8 @@
 package com.coreo.listbox.screens
 
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -44,11 +47,13 @@ import listbox.composeapp.generated.resources.Res
 import listbox.composeapp.generated.resources.empty_box
 import listbox.composeapp.generated.resources.listbox_banner_logo
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun HomeScreen(
     onListSelect: (String) -> Unit,
-    onListCreated: (String) -> Unit
+    onListCreated: (String) -> Unit,
+    sharedTransitionScope: SharedTransitionScope? = null,
+    animatedContentScope: AnimatedContentScope? = null
 ) {
     val repository = remember { ServiceLocator.getRepository() }
     val viewModel = remember { HomeViewModel(repository) }
@@ -121,7 +126,9 @@ fun HomeScreen(
                 items(listEntities) { list ->
                     ListCard(
                         list = list,
-                        onClick = { onListSelect(list.id) }
+                        onClick = { onListSelect(list.id) },
+                        sharedTransitionScope = sharedTransitionScope,
+                        animatedContentScope = animatedContentScope
                     )
                 }
             }
@@ -232,13 +239,25 @@ private fun TemplateButton(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun ListCard(
     list: ListEntity,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    sharedTransitionScope: SharedTransitionScope? = null,
+    animatedContentScope: AnimatedContentScope? = null
 ) {
+    val sharedModifier = if (sharedTransitionScope != null && animatedContentScope != null) {
+        with(sharedTransitionScope) {
+            Modifier.sharedBounds(
+                rememberSharedContentState(key = "list_card_${list.id}"),
+                animatedVisibilityScope = animatedContentScope,
+                resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds
+            )
+        }
+    } else Modifier
     Card(
-        modifier = Modifier
+        modifier = sharedModifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
     ) {

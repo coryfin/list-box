@@ -1,5 +1,7 @@
 package com.coreo.listbox.navigation
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -9,36 +11,43 @@ import com.coreo.listbox.screens.HomeScreen
 import com.coreo.listbox.screens.ItemDetailScreen
 import com.coreo.listbox.screens.ListDetailScreen
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 actual fun ListBoxNavHost() {
     val navController: NavHostController = rememberNavController()
 
-    NavHost(
-        navController = navController,
-        startDestination = Routes.HOME
-    ) {
-        composable(Routes.HOME) {
-            HomeScreen(
-                onListSelect = { listId -> navController.navigate(Routes.listDetail(listId)) },
-                onListCreated = { listId -> navController.navigate(Routes.listDetail(listId)) }
-            )
-        }
+    SharedTransitionLayout {
+        NavHost(
+            navController = navController,
+            startDestination = Routes.HOME
+        ) {
+            composable(Routes.HOME) {
+                HomeScreen(
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    animatedContentScope = this,
+                    onListSelect = { listId -> navController.navigate(Routes.listDetail(listId)) },
+                    onListCreated = { listId -> navController.navigate(Routes.listDetail(listId)) }
+                )
+            }
 
-        composable(Routes.LIST_DETAIL) { backStackEntry ->
-            val listId = backStackEntry.arguments?.getString("listId") ?: ""
-            ListDetailScreen(
-                listId = listId,
-                onItemNavigate = { itemId -> navController.navigate(Routes.itemDetail(itemId)) },
-                onBackClick = { navController.navigateUp() }
-            )
-        }
+            composable(Routes.LIST_DETAIL) { backStackEntry ->
+                val listId = backStackEntry.arguments?.getString("listId") ?: ""
+                ListDetailScreen(
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    animatedContentScope = this,
+                    listId = listId,
+                    onItemNavigate = { itemId -> navController.navigate(Routes.itemDetail(itemId)) },
+                    onBackClick = { navController.navigateUp() }
+                )
+            }
 
-        composable(Routes.ITEM_DETAIL) { backStackEntry ->
-            val itemId = backStackEntry.arguments?.getString("itemId") ?: ""
-            ItemDetailScreen(
-                itemId = itemId,
-                onBackClick = { navController.navigateUp() }
-            )
+            composable(Routes.ITEM_DETAIL) { backStackEntry ->
+                val itemId = backStackEntry.arguments?.getString("itemId") ?: ""
+                ItemDetailScreen(
+                    itemId = itemId,
+                    onBackClick = { navController.navigateUp() }
+                )
+            }
         }
     }
 }
