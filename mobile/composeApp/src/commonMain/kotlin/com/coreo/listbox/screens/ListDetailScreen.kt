@@ -1,6 +1,9 @@
 package com.coreo.listbox.screens
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -61,12 +64,14 @@ import sh.calvin.reorderable.ReorderableCollectionItemScope
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun ListDetailScreen(
     listId: String,
     onItemNavigate: (String) -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    sharedTransitionScope: SharedTransitionScope? = null,
+    animatedContentScope: AnimatedContentScope? = null
 ) {
     val repository = remember { ServiceLocator.getRepository() }
     val viewModel = remember { ListDetailViewModel(repository, listId) }
@@ -118,7 +123,18 @@ fun ListDetailScreen(
         )
     }
 
+    val containerModifier = if (sharedTransitionScope != null && animatedContentScope != null) {
+        with(sharedTransitionScope) {
+            Modifier.sharedBounds(
+                rememberSharedContentState(key = "list_card_$listId"),
+                animatedVisibilityScope = animatedContentScope,
+                resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds
+            )
+        }
+    } else Modifier
+
     Scaffold(
+        modifier = containerModifier,
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showAddItemSheet = true },
