@@ -1,8 +1,11 @@
 package com.coreo.listbox.screens
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
@@ -21,12 +24,11 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -73,7 +75,8 @@ fun ItemDetailScreen(
             titleFocusRequester.requestFocus()
         }
     }
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    val scrollState = rememberScrollState()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     val hasUnsavedChanges = isEditMode &&
         (draftTitle.text != (item?.title ?: "") || draftDescription != (item?.description ?: ""))
@@ -146,39 +149,9 @@ fun ItemDetailScreen(
             }
         },
         topBar = {
-            MediumTopAppBar(
-                title = {
-                    if (isEditMode) {
-                        BasicTextField(
-                            value = draftTitle,
-                            onValueChange = { draftTitle = it },
-                            textStyle = MaterialTheme.typography.headlineSmall.copy(
-                                color = MaterialTheme.colorScheme.onSurface
-                            ),
-                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                            modifier = Modifier.fillMaxWidth().focusRequester(titleFocusRequester),
-                            singleLine = true,
-                            decorationBox = { innerTextField ->
-                                Box {
-                                    if (draftTitle.text.isEmpty()) {
-                                        Text(
-                                            text = "Title",
-                                            style = MaterialTheme.typography.headlineSmall.copy(
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                        )
-                                    }
-                                    innerTextField()
-                                }
-                            }
-                        )
-                    } else {
-                        Text(
-                            text = item?.title ?: "",
-                            style = MaterialTheme.typography.headlineSmall
-                        )
-                    }
-                },
+            TopAppBar(
+                title = {},
+                scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     if (isEditMode) {
                         IconButton(onClick = {
@@ -235,51 +208,81 @@ fun ItemDetailScreen(
                             )
                         }
                     }
-                },
-                scrollBehavior = scrollBehavior
+                }
             )
         }
     ) { paddingValues ->
-        if (isEditMode) {
-            BasicTextField(
-                value = draftDescription,
-                onValueChange = { draftDescription = it },
-                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                    color = MaterialTheme.colorScheme.onSurface
-                ),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-                    .verticalScroll(rememberScrollState()),
-                decorationBox = { innerTextField ->
-                    Box {
-                        if (draftDescription.isEmpty()) {
-                            Text(
-                                text = "Add a description\u2026",
-                                style = MaterialTheme.typography.bodyLarge.copy(
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(paddingValues)
+                .verticalScroll(scrollState)
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+        ) {
+            if (isEditMode) {
+                BasicTextField(
+                    value = draftTitle,
+                    onValueChange = { draftTitle = it },
+                    textStyle = MaterialTheme.typography.headlineMedium.copy(
+                        color = MaterialTheme.colorScheme.onSurface
+                    ),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    modifier = Modifier.fillMaxWidth().focusRequester(titleFocusRequester),
+                    singleLine = true,
+                    decorationBox = { innerTextField ->
+                        Box {
+                            if (draftTitle.text.isEmpty()) {
+                                Text(
+                                    text = "Title",
+                                    style = MaterialTheme.typography.headlineMedium.copy(
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 )
-                            )
+                            }
+                            innerTextField()
                         }
-                        innerTextField()
                     }
-                }
-            )
-        } else {
-            val description = item?.description
-            Text(
-                text = if (!description.isNullOrBlank()) description else "No description",
-                style = MaterialTheme.typography.bodyLarge,
-                color = if (!description.isNullOrBlank()) MaterialTheme.colorScheme.onSurface
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-                    .verticalScroll(rememberScrollState())
-            )
+                )
+            } else {
+                Text(
+                    text = item?.title ?: "",
+                    style = MaterialTheme.typography.headlineMedium
+                )
+            }
+            Spacer(Modifier.height(12.dp))
+            if (isEditMode) {
+                BasicTextField(
+                    value = draftDescription,
+                    onValueChange = { draftDescription = it },
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(
+                        color = MaterialTheme.colorScheme.onSurface
+                    ),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    modifier = Modifier.fillMaxWidth(),
+                    decorationBox = { innerTextField ->
+                        Box {
+                            if (draftDescription.isEmpty()) {
+                                Text(
+                                    text = "Add a description\u2026",
+                                    style = MaterialTheme.typography.bodyLarge.copy(
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                )
+                            }
+                            innerTextField()
+                        }
+                    }
+                )
+            } else {
+                val description = item?.description
+                Text(
+                    text = if (!description.isNullOrBlank()) description else "No description",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = if (!description.isNullOrBlank()) MaterialTheme.colorScheme.onSurface
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }
