@@ -2,6 +2,11 @@ package com.coreo.listbox.navigation
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -30,7 +35,25 @@ actual fun ListBoxNavHost() {
                 )
             }
 
-            composable(Routes.LIST_DETAIL) { backStackEntry ->
+            composable(
+                Routes.LIST_DETAIL,
+                exitTransition = {
+                    if (targetState.destination.route == Routes.ITEM_DETAIL) {
+                        fadeOut(animationSpec = tween(200)) +
+                                slideOutHorizontally(targetOffsetX = { -(it * 0.1f).toInt() }, animationSpec = tween(300))
+                    } else {
+                        fadeOut(animationSpec = tween(700))
+                    }
+                },
+                popEnterTransition = {
+                    if (initialState.destination.route == Routes.ITEM_DETAIL) {
+                        fadeIn(animationSpec = tween(200)) +
+                                slideInHorizontally(initialOffsetX = { -(it * 0.1f).toInt() }, animationSpec = tween(300))
+                    } else {
+                        fadeIn(animationSpec = tween(700))
+                    }
+                }
+            ) { backStackEntry ->
                 val listId = backStackEntry.arguments?.getString("listId") ?: ""
                 ListDetailScreen(
                     sharedTransitionScope = this@SharedTransitionLayout,
@@ -41,7 +64,17 @@ actual fun ListBoxNavHost() {
                 )
             }
 
-            composable(Routes.ITEM_DETAIL) { backStackEntry ->
+            composable(
+                Routes.ITEM_DETAIL,
+                enterTransition = {
+                    fadeIn(animationSpec = tween(200)) +
+                            slideInHorizontally(initialOffsetX = { (it * 0.1f).toInt() }, animationSpec = tween(300))
+                },
+                popExitTransition = {
+                    fadeOut(animationSpec = tween(200)) +
+                            slideOutHorizontally(targetOffsetX = { (it * 0.1f).toInt() }, animationSpec = tween(300))
+                }
+            ) { backStackEntry ->
                 val itemId = backStackEntry.arguments?.getString("itemId") ?: ""
                 ItemDetailScreen(
                     itemId = itemId,
