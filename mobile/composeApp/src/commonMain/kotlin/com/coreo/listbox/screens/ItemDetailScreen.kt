@@ -3,9 +3,9 @@ package com.coreo.listbox.screens
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
@@ -67,7 +67,7 @@ fun ItemDetailScreen(
         val text = item?.title ?: ""
         mutableStateOf(TextFieldValue(text = text, selection = TextRange(text.length)))
     }
-    var draftDescription by remember(item?.id) { mutableStateOf(item?.description ?: "") }
+    var draftDescription by remember(item?.id) { mutableStateOf(TextFieldValue(item?.description ?: "")) }
     val titleFocusRequester = remember { FocusRequester() }
 
     LaunchedEffect(isEditMode) {
@@ -77,16 +77,31 @@ fun ItemDetailScreen(
     }
     val scrollState = rememberScrollState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    var prevScrollMax by remember { mutableStateOf(0) }
+
+    LaunchedEffect(scrollState.maxValue) {
+        val newMax = scrollState.maxValue
+        if (isEditMode && newMax > prevScrollMax && scrollState.value >= prevScrollMax - 4) {
+            scrollState.animateScrollTo(newMax)
+        }
+        prevScrollMax = newMax
+    }
+
+    LaunchedEffect(draftDescription.selection) {
+        if (isEditMode && draftDescription.selection.end == draftDescription.text.length) {
+            scrollState.animateScrollTo(scrollState.maxValue)
+        }
+    }
 
     val hasUnsavedChanges = isEditMode &&
-        (draftTitle.text != (item?.title ?: "") || draftDescription != (item?.description ?: ""))
+        (draftTitle.text != (item?.title ?: "") || draftDescription.text != (item?.description ?: ""))
 
     BackHandler(enabled = isEditMode) {
         if (hasUnsavedChanges) {
             showDiscardDialog = true
         } else {
             draftTitle = TextFieldValue(item?.title ?: "")
-            draftDescription = item?.description ?: ""
+            draftDescription = TextFieldValue(item?.description ?: "")
             viewModel.exitEditMode()
         }
     }
@@ -100,7 +115,7 @@ fun ItemDetailScreen(
                 TextButton(onClick = {
                     showDiscardDialog = false
                     draftTitle = TextFieldValue(item?.title ?: "")
-                    draftDescription = item?.description ?: ""
+                    draftDescription = TextFieldValue(item?.description ?: "")
                     viewModel.exitEditMode()
                 }) {
                     Text("Discard")
@@ -159,7 +174,7 @@ fun ItemDetailScreen(
                                 showDiscardDialog = true
                             } else {
                                 draftTitle = TextFieldValue(item?.title ?: "")
-                                draftDescription = item?.description ?: ""
+                                draftDescription = TextFieldValue(item?.description ?: "")
                                 viewModel.exitEditMode()
                             }
                         }) {
@@ -180,7 +195,7 @@ fun ItemDetailScreen(
                 actions = {
                     if (isEditMode) {
                         IconButton(
-                            onClick = { viewModel.saveItem(draftTitle.text, draftDescription.ifBlank { null }) },
+                            onClick = { viewModel.saveItem(draftTitle.text, draftDescription.text.ifBlank { null }) },
                             enabled = draftTitle.text.isNotBlank()
                         ) {
                             Icon(
@@ -216,6 +231,7 @@ fun ItemDetailScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(paddingValues)
+                .imePadding()
                 .verticalScroll(scrollState)
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
@@ -261,7 +277,7 @@ fun ItemDetailScreen(
                     modifier = Modifier.fillMaxWidth(),
                     decorationBox = { innerTextField ->
                         Box {
-                            if (draftDescription.isEmpty()) {
+                            if (draftDescription.text.isEmpty()) {
                                 Text(
                                     text = "Add a description\u2026",
                                     style = MaterialTheme.typography.bodyLarge.copy(
