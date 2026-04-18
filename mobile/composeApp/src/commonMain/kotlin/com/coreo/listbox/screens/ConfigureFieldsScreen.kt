@@ -32,8 +32,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.coreo.listbox.components.AddFieldDialog
-import com.coreo.listbox.components.EditFieldDialog
+import com.coreo.listbox.components.AddFieldBottomSheet
+import com.coreo.listbox.components.EditFieldBottomSheet
 import com.coreo.listbox.database.FieldDefinitionEntity
 import com.coreo.listbox.di.ServiceLocator
 import com.coreo.listbox.viewmodel.ConfigureFieldsViewModel
@@ -56,7 +56,7 @@ fun ConfigureFieldsScreen(
     var deletingField by remember { mutableStateOf<FieldDefinitionEntity?>(null) }
 
     if (showAddFieldDialog) {
-        AddFieldDialog(
+        AddFieldBottomSheet(
             onDismiss = { showAddFieldDialog = false },
             onSave = { name, dataType, options ->
                 viewModel.addField(name, dataType, options)
@@ -70,7 +70,7 @@ fun ConfigureFieldsScreen(
         } else {
             emptyList()
         }
-        EditFieldDialog(
+        EditFieldBottomSheet(
             initialName = field.name,
             initialDataType = field.dataType,
             initialOptions = existingOptions,

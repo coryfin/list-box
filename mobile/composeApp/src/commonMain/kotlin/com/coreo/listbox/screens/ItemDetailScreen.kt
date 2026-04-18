@@ -51,7 +51,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import com.coreo.listbox.components.AddFieldDialog
+import com.coreo.listbox.components.AddFieldBottomSheet
 import com.coreo.listbox.di.ServiceLocator
 import com.coreo.listbox.viewmodel.ItemDetailViewModel
 
@@ -120,7 +120,7 @@ fun ItemDetailScreen(
     }
 
     if (showAddFieldDialog) {
-        AddFieldDialog(
+        AddFieldBottomSheet(
             onDismiss = { showAddFieldDialog = false },
             onSave = { name, dataType, options ->
                 viewModel.addFieldDefinition(name, dataType, options)
