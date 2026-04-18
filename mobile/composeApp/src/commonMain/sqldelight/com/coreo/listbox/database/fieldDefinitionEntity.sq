@@ -4,7 +4,7 @@ CREATE TABLE fieldDefinitionEntity (
     name TEXT NOT NULL,
     dataType TEXT NOT NULL, -- 'TEXT' or 'DROPDOWN'
     orderIndex INTEGER NOT NULL,
-    visible INTEGER NOT NULL DEFAULT 1,
+    visible INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY(listId) REFERENCES listEntity(id) ON DELETE CASCADE
 );
 
@@ -12,8 +12,8 @@ CREATE INDEX idx_field_def_list ON fieldDefinitionEntity(listId, orderIndex);
 
 -- Queries
 insertFieldDefinition:
-INSERT INTO fieldDefinitionEntity(id, listId, name, dataType, orderIndex)
-VALUES (?, ?, ?, ?, ?);
+INSERT INTO fieldDefinitionEntity(id, listId, name, dataType, orderIndex, visible)
+VALUES (?, ?, ?, ?, ?, 0);
 
 getFieldDefinitionsByListId:
 SELECT id, listId, name, dataType, orderIndex, visible FROM fieldDefinitionEntity
