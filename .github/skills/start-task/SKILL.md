@@ -11,10 +11,9 @@ This skill streamlines task startup by:
 
 1. **Accepting** a specific Linear issue ID from the user
 2. **Fetching** complete issue details from Linear
-3. **Updating** `tasks.md` with the current issue
-4. **Setting** the Linear issue status to "In Progress"
-5. **Reviewing** `requirements.md` and `plan.md` for project-level specs
-6. **Providing** implementation guidance based on issue description
+3. **Setting** the Linear issue status to "In Progress"
+4. **Reviewing** `requirements.md` and `plan.md` for project-level specs and update as needed.
+5. **Providing** implementation guidance based on issue description
 
 ## Workflow Steps
 
