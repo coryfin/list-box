@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.coreo.listbox.screens.ConfigureFieldsScreen
 import com.coreo.listbox.screens.HomeScreen
 import com.coreo.listbox.screens.ItemDetailScreen
 import com.coreo.listbox.screens.ListDetailScreen
@@ -22,12 +23,14 @@ sealed class NavigationState {
     object Home : NavigationState()
     data class ListDetail(val listId: String) : NavigationState()
     data class ItemDetail(val itemId: String, val listId: String) : NavigationState()
+    data class ConfigureFields(val listId: String) : NavigationState()
 }
 
 private fun NavigationState.depth(): Int = when (this) {
     NavigationState.Home -> 0
     is NavigationState.ListDetail -> 1
     is NavigationState.ItemDetail -> 2
+    is NavigationState.ConfigureFields -> 2
 }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -76,7 +79,17 @@ actual fun ListBoxNavHost() {
                         onItemNavigate = { itemId ->
                             currentState = NavigationState.ItemDetail(itemId = itemId, listId = state.listId)
                         },
+                        onConfigureFieldsClick = {
+                            currentState = NavigationState.ConfigureFields(listId = state.listId)
+                        },
                         onBackClick = { currentState = NavigationState.Home }
+                    )
+                }
+
+                is NavigationState.ConfigureFields -> {
+                    ConfigureFieldsScreen(
+                        listId = state.listId,
+                        onBackClick = { currentState = NavigationState.ListDetail(state.listId) }
                     )
                 }
 

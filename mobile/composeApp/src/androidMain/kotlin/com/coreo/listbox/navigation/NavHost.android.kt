@@ -12,6 +12,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.coreo.listbox.screens.ConfigureFieldsScreen
 import com.coreo.listbox.screens.HomeScreen
 import com.coreo.listbox.screens.ItemDetailScreen
 import com.coreo.listbox.screens.ListDetailScreen
@@ -60,6 +61,15 @@ actual fun ListBoxNavHost() {
                     animatedContentScope = this,
                     listId = listId,
                     onItemNavigate = { itemId -> navController.navigate(Routes.itemDetail(itemId)) },
+                    onConfigureFieldsClick = { navController.navigate(Routes.configureFields(listId)) },
+                    onBackClick = { navController.navigateUp() }
+                )
+            }
+
+            composable(Routes.CONFIGURE_FIELDS) { backStackEntry ->
+                val listId = backStackEntry.arguments?.getString("listId") ?: ""
+                ConfigureFieldsScreen(
+                    listId = listId,
                     onBackClick = { navController.navigateUp() }
                 )
             }

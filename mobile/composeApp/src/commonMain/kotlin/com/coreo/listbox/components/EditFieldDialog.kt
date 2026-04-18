@@ -39,19 +39,35 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 
-private val DATA_TYPES = listOf("Text", "Dropdown")
+private val EDIT_DATA_TYPES = listOf("Text", "Dropdown")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddFieldBottomSheet(
+fun EditFieldBottomSheet(
+    initialName: String,
+    initialDataType: String,
+    initialOptions: List<String>,
     onDismiss: () -> Unit,
     onSave: (name: String, dataType: String, options: List<String>) -> Unit
 ) {
-    var fieldLabel by remember { mutableStateOf("") }
-    var selectedDataType by remember { mutableStateOf(DATA_TYPES[0]) }
+    var fieldLabel by remember { mutableStateOf(initialName) }
+    val initialDisplayType = if (initialDataType == "DROPDOWN") "Dropdown" else "Text"
+    var selectedDataType by remember { mutableStateOf(initialDisplayType) }
     var typeMenuExpanded by remember { mutableStateOf(false) }
-    val options = remember { mutableStateListOf("") }
-    val focusRequesters = remember { mutableStateListOf(FocusRequester()) }
+    val options = remember {
+        mutableStateListOf<String>().also { list ->
+            if (initialOptions.isEmpty() && initialDisplayType == "Dropdown") {
+                list.add("")
+            } else {
+                list.addAll(initialOptions)
+            }
+        }
+    }
+    val focusRequesters = remember {
+        mutableStateListOf<FocusRequester>().also { list ->
+            repeat(options.size.coerceAtLeast(1)) { list.add(FocusRequester()) }
+        }
+    }
 
     val isDropdown = selectedDataType == "Dropdown"
     val isSaveEnabled = fieldLabel.trim().isNotEmpty() &&
@@ -78,7 +94,7 @@ fun AddFieldBottomSheet(
                 .navigationBarsPadding()
         ) {
             Text(
-                text = "New field",
+                text = "Edit field",
                 style = MaterialTheme.typography.titleLarge
             )
             Spacer(Modifier.height(16.dp))
@@ -110,7 +126,7 @@ fun AddFieldBottomSheet(
                     expanded = typeMenuExpanded,
                     onDismissRequest = { typeMenuExpanded = false }
                 ) {
-                    DATA_TYPES.forEach { type ->
+                    EDIT_DATA_TYPES.forEach { type ->
                         DropdownMenuItem(
                             text = { Text(type) },
                             onClick = {
