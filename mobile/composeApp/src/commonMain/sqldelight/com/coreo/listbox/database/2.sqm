@@ -1,0 +1,32 @@
+CREATE TABLE fieldDefinitionEntity (
+    id TEXT PRIMARY KEY NOT NULL,
+    listId TEXT NOT NULL,
+    name TEXT NOT NULL,
+    dataType TEXT NOT NULL,
+    orderIndex INTEGER NOT NULL,
+    FOREIGN KEY(listId) REFERENCES listEntity(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_field_def_list ON fieldDefinitionEntity(listId, orderIndex);
+
+CREATE TABLE fieldOptionEntity (
+    id TEXT PRIMARY KEY NOT NULL,
+    fieldDefinitionId TEXT NOT NULL,
+    label TEXT NOT NULL,
+    orderIndex INTEGER NOT NULL,
+    FOREIGN KEY(fieldDefinitionId) REFERENCES fieldDefinitionEntity(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_field_option_def ON fieldOptionEntity(fieldDefinitionId, orderIndex);
+
+CREATE TABLE fieldValueEntity (
+    id TEXT PRIMARY KEY NOT NULL,
+    itemId TEXT NOT NULL,
+    fieldDefinitionId TEXT NOT NULL,
+    value TEXT NOT NULL,
+    FOREIGN KEY(itemId) REFERENCES itemEntity(id) ON DELETE CASCADE,
+    FOREIGN KEY(fieldDefinitionId) REFERENCES fieldDefinitionEntity(id) ON DELETE CASCADE,
+    UNIQUE(itemId, fieldDefinitionId)
+);
+
+CREATE INDEX idx_field_value_item ON fieldValueEntity(itemId);

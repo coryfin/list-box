@@ -12,6 +12,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
@@ -20,10 +21,14 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -46,6 +51,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.coreo.listbox.components.AddFieldDialog
 import com.coreo.listbox.di.ServiceLocator
 import com.coreo.listbox.viewmodel.ItemDetailViewModel
 
@@ -59,9 +65,14 @@ fun ItemDetailScreen(
     val viewModel = remember { ItemDetailViewModel(repository, itemId) }
     val item by viewModel.item.collectAsState()
     val isEditMode by viewModel.isEditMode.collectAsState()
+    val fieldDefinitions by viewModel.fieldDefinitions.collectAsState()
+    val fieldOptions by viewModel.fieldOptions.collectAsState()
+    val fieldValues by viewModel.fieldValues.collectAsState()
+    val draftFieldValues by viewModel.draftFieldValues.collectAsState()
     var showOverflowMenu by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showDiscardDialog by remember { mutableStateOf(false) }
+    var showAddFieldDialog by remember { mutableStateOf(false) }
     // Drafts are keyed on item id so they reset on first load (null → actual id)
     var draftTitle by remember(item?.id) {
         val text = item?.title ?: ""
@@ -94,7 +105,9 @@ fun ItemDetailScreen(
     }
 
     val hasUnsavedChanges = isEditMode &&
-        (draftTitle.text != (item?.title ?: "") || draftDescription.text != (item?.description ?: ""))
+        (draftTitle.text != (item?.title ?: "") ||
+            draftDescription.text != (item?.description ?: "") ||
+            viewModel.fieldValuesHaveChanged())
 
     BackHandler(enabled = isEditMode) {
         if (hasUnsavedChanges) {
@@ -104,6 +117,15 @@ fun ItemDetailScreen(
             draftDescription = TextFieldValue(item?.description ?: "")
             viewModel.exitEditMode()
         }
+    }
+
+    if (showAddFieldDialog) {
+        AddFieldDialog(
+            onDismiss = { showAddFieldDialog = false },
+            onSave = { name, dataType, options ->
+                viewModel.addFieldDefinition(name, dataType, options)
+            }
+        )
     }
 
     if (showDiscardDialog) {
@@ -299,7 +321,89 @@ fun ItemDetailScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
             }
+
+            // Custom fields
+            if (fieldDefinitions.isNotEmpty()) {
+                Spacer(Modifier.height(16.dp))
+            }
+            fieldDefinitions.forEach { fieldDef ->
+                if (isEditMode) {
+                    val currentValue = draftFieldValues[fieldDef.id] ?: fieldValues[fieldDef.id] ?: ""
+                    if (fieldDef.dataType == "DROPDOWN") {
+                        val options = fieldOptions[fieldDef.id] ?: emptyList()
+                        var dropdownExpanded by remember(fieldDef.id) { mutableStateOf(false) }
+                        ExposedDropdownMenuBox(
+                            expanded = dropdownExpanded,
+                            onExpandedChange = { dropdownExpanded = it },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            OutlinedTextField(
+                                value = currentValue,
+                                onValueChange = {},
+                                readOnly = true,
+                                label = { Text(fieldDef.name) },
+                                trailingIcon = {
+                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded)
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .menuAnchor(androidx.compose.material3.ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                            )
+                            ExposedDropdownMenu(
+                                expanded = dropdownExpanded,
+                                onDismissRequest = { dropdownExpanded = false }
+                            ) {
+                                options.forEach { option ->
+                                    DropdownMenuItem(
+                                        text = { Text(option.label) },
+                                        onClick = {
+                                            viewModel.updateDraftFieldValue(fieldDef.id, option.label)
+                                            dropdownExpanded = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        OutlinedTextField(
+                            value = currentValue,
+                            onValueChange = { viewModel.updateDraftFieldValue(fieldDef.id, it) },
+                            label = { Text(fieldDef.name) },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                    Spacer(Modifier.height(12.dp))
+                } else {
+                    val value = fieldValues[fieldDef.id]
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = fieldDef.name,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = if (!value.isNullOrBlank()) value else "None",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = if (!value.isNullOrBlank()) MaterialTheme.colorScheme.onSurface
+                                    else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Spacer(Modifier.height(16.dp))
+                }
+            }
+
+            if (isEditMode) {
+                OutlinedButton(
+                    onClick = { showAddFieldDialog = true }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null
+                    )
+                    Spacer(Modifier.padding(horizontal = 4.dp))
+                    Text("Add field")
+                }
+            }
         }
     }
 }
-

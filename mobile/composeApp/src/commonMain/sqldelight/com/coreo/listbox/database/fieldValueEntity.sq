@@ -1,0 +1,32 @@
+CREATE TABLE fieldValueEntity (
+    id TEXT PRIMARY KEY NOT NULL,
+    itemId TEXT NOT NULL,
+    fieldDefinitionId TEXT NOT NULL,
+    value TEXT NOT NULL,
+    FOREIGN KEY(itemId) REFERENCES itemEntity(id) ON DELETE CASCADE,
+    FOREIGN KEY(fieldDefinitionId) REFERENCES fieldDefinitionEntity(id) ON DELETE CASCADE,
+    UNIQUE(itemId, fieldDefinitionId)
+);
+
+CREATE INDEX idx_field_value_item ON fieldValueEntity(itemId);
+
+-- Queries
+upsertFieldValue:
+INSERT OR REPLACE INTO fieldValueEntity(id, itemId, fieldDefinitionId, value)
+VALUES (?, ?, ?, ?);
+
+getFieldValuesByItemId:
+SELECT id, itemId, fieldDefinitionId, value FROM fieldValueEntity
+WHERE itemId = ?;
+
+deleteFieldValuesByItemId:
+DELETE FROM fieldValueEntity
+WHERE itemId = ?;
+
+deleteFieldValuesByFieldDefinitionId:
+DELETE FROM fieldValueEntity
+WHERE fieldDefinitionId = ?;
+
+getFieldValueByItemAndDefinition:
+SELECT id, itemId, fieldDefinitionId, value FROM fieldValueEntity
+WHERE itemId = ? AND fieldDefinitionId = ?;

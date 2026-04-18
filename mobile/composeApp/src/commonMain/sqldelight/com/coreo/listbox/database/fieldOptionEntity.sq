@@ -1,0 +1,23 @@
+CREATE TABLE fieldOptionEntity (
+    id TEXT PRIMARY KEY NOT NULL,
+    fieldDefinitionId TEXT NOT NULL,
+    label TEXT NOT NULL,
+    orderIndex INTEGER NOT NULL,
+    FOREIGN KEY(fieldDefinitionId) REFERENCES fieldDefinitionEntity(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_field_option_def ON fieldOptionEntity(fieldDefinitionId, orderIndex);
+
+-- Queries
+insertFieldOption:
+INSERT INTO fieldOptionEntity(id, fieldDefinitionId, label, orderIndex)
+VALUES (?, ?, ?, ?);
+
+getFieldOptionsByDefinitionId:
+SELECT id, fieldDefinitionId, label, orderIndex FROM fieldOptionEntity
+WHERE fieldDefinitionId = ?
+ORDER BY orderIndex;
+
+deleteFieldOptionsByDefinitionId:
+DELETE FROM fieldOptionEntity
+WHERE fieldDefinitionId = ?;

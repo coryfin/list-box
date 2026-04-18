@@ -1,0 +1,32 @@
+CREATE TABLE fieldDefinitionEntity (
+    id TEXT PRIMARY KEY NOT NULL,
+    listId TEXT NOT NULL,
+    name TEXT NOT NULL,
+    dataType TEXT NOT NULL, -- 'TEXT' or 'DROPDOWN'
+    orderIndex INTEGER NOT NULL,
+    FOREIGN KEY(listId) REFERENCES listEntity(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_field_def_list ON fieldDefinitionEntity(listId, orderIndex);
+
+-- Queries
+insertFieldDefinition:
+INSERT INTO fieldDefinitionEntity(id, listId, name, dataType, orderIndex)
+VALUES (?, ?, ?, ?, ?);
+
+getFieldDefinitionsByListId:
+SELECT id, listId, name, dataType, orderIndex FROM fieldDefinitionEntity
+WHERE listId = ?
+ORDER BY orderIndex;
+
+getFieldDefinitionById:
+SELECT id, listId, name, dataType, orderIndex FROM fieldDefinitionEntity
+WHERE id = ?;
+
+getMaxFieldOrderIndex:
+SELECT MAX(orderIndex) FROM fieldDefinitionEntity
+WHERE listId = ?;
+
+deleteFieldDefinition:
+DELETE FROM fieldDefinitionEntity
+WHERE id = ?;

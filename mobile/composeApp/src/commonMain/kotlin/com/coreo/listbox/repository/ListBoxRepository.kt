@@ -1,12 +1,14 @@
 package com.coreo.listbox.repository
 
 import app.cash.sqldelight.coroutines.asFlow
+import com.coreo.listbox.database.FieldDefinitionEntity
+import com.coreo.listbox.database.FieldOptionEntity
+import com.coreo.listbox.database.FieldValueEntity
 import com.coreo.listbox.database.ListBoxDatabase
 import com.coreo.listbox.database.ItemEntity
 import com.coreo.listbox.database.ListEntity
 import com.coreo.listbox.util.getCurrentTimestampMillis
 import com.coreo.listbox.util.generateUUID
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Inject
@@ -156,5 +158,97 @@ class ListBoxRepository(private val database: ListBoxDatabase) {
      */
     suspend fun deleteItems(itemIds: Collection<String>) {
         database.itemEntityQueries.deleteItemsByIds(id = itemIds)
+    }
+
+    // ---- Custom Field Definitions ----
+
+    /**
+     * Get all field definitions for a list as a reactive Flow, ordered by orderIndex
+     */
+    fun getFieldDefinitionsForList(listId: String): Flow<List<FieldDefinitionEntity>> {
+        return database.fieldDefinitionEntityQueries.getFieldDefinitionsByListId(listId)
+            .asFlow()
+            .map { it.executeAsList() }
+    }
+
+    /**
+     * Create a new field definition for a list, along with any initial dropdown options
+     */
+    suspend fun createFieldDefinition(
+        listId: String,
+        name: String,
+        dataType: String,
+        options: List<String> = emptyList()
+    ) {
+        val fieldId = generateUUID()
+        val maxOrderIndex = database.fieldDefinitionEntityQueries
+            .getMaxFieldOrderIndex(listId)
+            .executeAsOneOrNull()
+            ?.MAX ?: 0L
+        database.fieldDefinitionEntityQueries.insertFieldDefinition(
+            id = fieldId,
+            listId = listId,
+            name = name,
+            dataType = dataType,
+            orderIndex = maxOrderIndex + 1L
+        )
+        options.forEachIndexed { index, label ->
+            database.fieldOptionEntityQueries.insertFieldOption(
+                id = generateUUID(),
+                fieldDefinitionId = fieldId,
+                label = label,
+                orderIndex = index.toLong()
+            )
+        }
+    }
+
+    /**
+     * Delete a field definition and cascade its options and values
+     */
+    suspend fun deleteFieldDefinition(fieldDefinitionId: String) {
+        database.transaction {
+            database.fieldValueEntityQueries.deleteFieldValuesByFieldDefinitionId(fieldDefinitionId)
+            database.fieldOptionEntityQueries.deleteFieldOptionsByDefinitionId(fieldDefinitionId)
+            database.fieldDefinitionEntityQueries.deleteFieldDefinition(fieldDefinitionId)
+        }
+    }
+
+    // ---- Field Options ----
+
+    /**
+     * Get all options for a dropdown field definition as a reactive Flow
+     */
+    fun getFieldOptionsForDefinition(fieldDefinitionId: String): Flow<List<FieldOptionEntity>> {
+        return database.fieldOptionEntityQueries
+            .getFieldOptionsByDefinitionId(fieldDefinitionId)
+            .asFlow()
+            .map { it.executeAsList() }
+    }
+
+    // ---- Field Values ----
+
+    /**
+     * Get all field values for an item as a reactive Flow
+     */
+    fun getFieldValuesForItem(itemId: String): Flow<List<FieldValueEntity>> {
+        return database.fieldValueEntityQueries.getFieldValuesByItemId(itemId)
+            .asFlow()
+            .map { it.executeAsList() }
+    }
+
+    /**
+     * Upsert a field value for a specific item + field definition pair
+     */
+    suspend fun upsertFieldValue(itemId: String, fieldDefinitionId: String, value: String) {
+        val existing = database.fieldValueEntityQueries
+            .getFieldValueByItemAndDefinition(itemId, fieldDefinitionId)
+            .executeAsOneOrNull()
+        val id = existing?.id ?: generateUUID()
+        database.fieldValueEntityQueries.upsertFieldValue(
+            id = id,
+            itemId = itemId,
+            fieldDefinitionId = fieldDefinitionId,
+            value_ = value
+        )
     }
 }
