@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "Figma": {
+      "url": "https://mcp.figma.com/mcp",
+      "type": "http"
+    },
+    "Linear": {
+      "type": "http",
+      "url": "https://mcp.linear.app/mcp",
+      "headers": {},
+      "tools": [
+        "*"
+      ]
+    }
+  }
+}
