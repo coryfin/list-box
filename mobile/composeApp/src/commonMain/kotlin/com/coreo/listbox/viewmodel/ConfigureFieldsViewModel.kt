@@ -63,4 +63,10 @@ class ConfigureFieldsViewModel(
             repository.deleteFieldDefinition(fieldId)
         }
     }
+
+    fun toggleVisibility(fieldId: String, currentVisible: Boolean) {
+        viewModelScope.launch {
+            repository.updateFieldDefinitionVisibility(fieldId, !currentVisible)
+        }
+    }
 }

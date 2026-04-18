@@ -252,6 +252,16 @@ class ListBoxRepository(private val database: ListBoxDatabase) {
         }
     }
 
+    /**
+     * Toggle the visibility of a custom field
+     */
+    suspend fun updateFieldDefinitionVisibility(fieldDefinitionId: String, visible: Boolean) {
+        database.fieldDefinitionEntityQueries.updateFieldVisibility(
+            visible = if (visible) 1L else 0L,
+            id = fieldDefinitionId
+        )
+    }
+
     // ---- Field Values ----
 
     /**

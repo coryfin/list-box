@@ -11,6 +11,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -144,6 +146,7 @@ fun ConfigureFieldsScreen(
                 FieldRow(
                     field = field,
                     onTap = { editingField = field },
+                    onVisibilityToggle = { viewModel.toggleVisibility(field.id, field.visible == 1L) },
                     onDeleteClick = { deletingField = field }
                 )
             }
@@ -155,6 +158,7 @@ fun ConfigureFieldsScreen(
 private fun FieldRow(
     field: FieldDefinitionEntity,
     onTap: () -> Unit,
+    onVisibilityToggle: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
     Row(
@@ -163,6 +167,16 @@ private fun FieldRow(
             .padding(horizontal = 8.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        IconButton(onClick = onVisibilityToggle) {
+            Icon(
+                imageVector = if (field.visible == 1L) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                contentDescription = if (field.visible == 1L) "Hide field" else "Show field",
+                tint = if (field.visible == 1L)
+                    MaterialTheme.colorScheme.onSurface
+                else
+                    MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
         TextButton(
             onClick = onTap,
             modifier = Modifier.weight(1f)
