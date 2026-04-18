@@ -30,3 +30,8 @@ WHERE listId = ?;
 deleteFieldDefinition:
 DELETE FROM fieldDefinitionEntity
 WHERE id = ?;
+
+updateFieldDefinition:
+UPDATE fieldDefinitionEntity
+SET name = ?, dataType = ?
+WHERE id = ?;

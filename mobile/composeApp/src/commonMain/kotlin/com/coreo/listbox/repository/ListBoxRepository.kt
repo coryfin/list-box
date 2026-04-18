@@ -225,6 +225,33 @@ class ListBoxRepository(private val database: ListBoxDatabase) {
             .map { it.executeAsList() }
     }
 
+    /**
+     * Update a field definition's name and data type, replacing all options atomically
+     */
+    suspend fun updateFieldDefinition(
+        fieldId: String,
+        name: String,
+        dataType: String,
+        options: List<String> = emptyList()
+    ) {
+        database.transaction {
+            database.fieldDefinitionEntityQueries.updateFieldDefinition(
+                name = name,
+                dataType = dataType,
+                id = fieldId
+            )
+            database.fieldOptionEntityQueries.deleteFieldOptionsByDefinitionId(fieldId)
+            options.forEachIndexed { index, label ->
+                database.fieldOptionEntityQueries.insertFieldOption(
+                    id = generateUUID(),
+                    fieldDefinitionId = fieldId,
+                    label = label,
+                    orderIndex = index.toLong()
+                )
+            }
+        }
+    }
+
     // ---- Field Values ----
 
     /**

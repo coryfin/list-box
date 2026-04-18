@@ -70,6 +70,7 @@ fun ListDetailScreen(
     listId: String,
     onItemNavigate: (String) -> Unit,
     onBackClick: () -> Unit,
+    onConfigureFieldsClick: () -> Unit = {},
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedContentScope: AnimatedContentScope? = null
 ) {
@@ -219,6 +220,13 @@ fun ListDetailScreen(
                                     onClick = {
                                         showOverflowMenu = false
                                         showDeleteListDialog = true
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Configure Fields") },
+                                    onClick = {
+                                        showOverflowMenu = false
+                                        onConfigureFieldsClick()
                                     }
                                 )
                             }
