@@ -50,3 +50,16 @@ getMaxOrderIndex:
 SELECT MAX(orderIndex) FROM itemEntity
 WHERE listId = ?;
 
+getItemsWithVisibleFieldValues:
+SELECT
+    i.id AS itemId,
+    fd.name AS fieldName,
+    fd.orderIndex AS fieldOrderIndex,
+    fv.value AS fieldValue,
+    fo.color AS optionColor
+FROM itemEntity i, fieldDefinitionEntity fd
+LEFT JOIN fieldValueEntity fv ON fv.itemId = i.id AND fv.fieldDefinitionId = fd.id
+LEFT JOIN fieldOptionEntity fo ON fo.fieldDefinitionId = fd.id AND fo.label = fv.value
+WHERE i.listId = ? AND fd.listId = ? AND fd.visible = 1
+ORDER BY i.orderIndex, fd.orderIndex;
+

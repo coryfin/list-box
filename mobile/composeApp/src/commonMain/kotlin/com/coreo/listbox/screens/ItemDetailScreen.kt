@@ -1,12 +1,15 @@
 package com.coreo.listbox.screens
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
@@ -52,7 +55,9 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.coreo.listbox.components.AddFieldBottomSheet
+import com.coreo.listbox.components.OptionColorDot
 import com.coreo.listbox.di.ServiceLocator
+import com.coreo.listbox.ui.theme.optionColorEntryFor
 import com.coreo.listbox.viewmodel.ItemDetailViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
@@ -337,11 +342,16 @@ fun ItemDetailScreen(
                             onExpandedChange = { dropdownExpanded = it },
                             modifier = Modifier.fillMaxWidth()
                         ) {
+                            val selectedOptionColor = options.find { it.label == currentValue }
+                                ?.color?.takeIf { it.isNotBlank() }
                             OutlinedTextField(
                                 value = currentValue,
                                 onValueChange = {},
                                 readOnly = true,
                                 label = { Text(fieldDef.name) },
+                                leadingIcon = selectedOptionColor?.let { token ->
+                                    { OptionColorDot(tokenName = token, modifier = Modifier.padding(start = 4.dp)) }
+                                },
                                 trailingIcon = {
                                     ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded)
                                 },
@@ -355,7 +365,15 @@ fun ItemDetailScreen(
                             ) {
                                 options.forEach { option ->
                                     DropdownMenuItem(
-                                        text = { Text(option.label) },
+                                        text = {
+                                            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                                                if (option.color.isNotBlank()) {
+                                                    OptionColorDot(tokenName = option.color)
+                                                    Spacer(Modifier.width(8.dp))
+                                                }
+                                                Text(option.label)
+                                            }
+                                        },
                                         onClick = {
                                             viewModel.updateDraftFieldValue(fieldDef.id, option.label)
                                             dropdownExpanded = false
@@ -375,17 +393,29 @@ fun ItemDetailScreen(
                     Spacer(Modifier.height(12.dp))
                 } else {
                     val value = fieldValues[fieldDef.id]
+                    val optionColor = if (fieldDef.dataType == "DROPDOWN" && !value.isNullOrBlank()) {
+                        fieldOptions[fieldDef.id]?.find { it.label == value }?.color
+                            ?.takeIf { it.isNotBlank() }
+                    } else null
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Text(
                             text = fieldDef.name,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                        Spacer(Modifier.height(4.dp))
+                        val displayColor = if (!value.isNullOrBlank() && optionColor != null) {
+                            val entry = optionColorEntryFor(optionColor)
+                            if (isSystemInDarkTheme()) entry.darkTextColor else entry.lightTextColor
+                        } else if (!value.isNullOrBlank()) {
+                            MaterialTheme.colorScheme.onSurface
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
                         Text(
                             text = if (!value.isNullOrBlank()) value else "None",
                             style = MaterialTheme.typography.bodyLarge,
-                            color = if (!value.isNullOrBlank()) MaterialTheme.colorScheme.onSurface
-                                    else MaterialTheme.colorScheme.onSurfaceVariant
+                            color = displayColor
                         )
                     }
                     Spacer(Modifier.height(16.dp))

@@ -49,6 +49,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.foundation.isSystemInDarkTheme
 import com.coreo.listbox.components.AddItemBottomSheet
 import org.jetbrains.compose.resources.painterResource
 import listbox.composeapp.generated.resources.Res
@@ -56,6 +58,8 @@ import com.coreo.listbox.components.DeleteItemsDialog
 import com.coreo.listbox.components.DeleteListDialog
 import com.coreo.listbox.components.RenameListDialog
 import com.coreo.listbox.database.ItemEntity
+import com.coreo.listbox.model.FieldValueDisplay
+import com.coreo.listbox.ui.theme.optionColorEntryFor
 import com.coreo.listbox.di.ServiceLocator
 import com.coreo.listbox.viewmodel.ListDetailViewModel
 import com.coreo.listbox.viewmodel.ListInteractionState
@@ -87,6 +91,7 @@ fun ListDetailScreen(
     val listInteractionState by viewModel.listInteractionState.collectAsState()
     val selectedItemIds by viewModel.selectedItemIds.collectAsState()
     val orderedItems by viewModel.orderedItems.collectAsState()
+    val itemCustomFieldValues by viewModel.itemCustomFieldValues.collectAsState()
 
     val lazyListState = rememberLazyListState()
     val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
@@ -266,6 +271,7 @@ fun ListDetailScreen(
                     ) { isDragging ->
                         ItemCard(
                             item = item,
+                            customFieldValues = itemCustomFieldValues[item.id] ?: emptyList(),
                             isSelected = selectedItemIds.contains(item.id),
                             isDragging = isDragging,
                             canDrag = listInteractionState != ListInteractionState.MultiSelect,
@@ -291,6 +297,7 @@ fun ListDetailScreen(
 @Composable
 private fun ItemCard(
     item: ItemEntity,
+    customFieldValues: List<FieldValueDisplay>,
     isSelected: Boolean,
     isDragging: Boolean,
     canDrag: Boolean,
@@ -309,7 +316,7 @@ private fun ItemCard(
                     onDragStopped = onDragEnd
                 )
                 .fillMaxSize()
-                .padding(vertical = 8.dp)
+                .padding(vertical = 2.dp)
         },
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected || isDragging)
@@ -318,12 +325,28 @@ private fun ItemCard(
                 MaterialTheme.colorScheme.surface
         )
     ) {
-        Text(
-            text = item.title,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(16.dp)
-        )
+        Column(modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp)) {
+            Text(
+                text = item.title,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            customFieldValues.forEach { fieldValue ->
+                val textColor = if (!fieldValue.optionColor.isNullOrBlank()) {
+                    val entry = optionColorEntryFor(fieldValue.optionColor)
+                    if (isSystemInDarkTheme()) entry.darkTextColor else entry.lightTextColor
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                }
+                Text(
+                    text = fieldValue.value,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = textColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
     }
 }
 

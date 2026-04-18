@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.coreo.listbox.database.FieldDefinitionEntity
 import com.coreo.listbox.database.FieldOptionEntity
 import com.coreo.listbox.database.ListEntity
+import com.coreo.listbox.model.DropdownOption
 import com.coreo.listbox.repository.ListBoxRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
@@ -46,13 +47,13 @@ class ConfigureFieldsViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyMap())
 
-    fun addField(name: String, dataType: String, options: List<String>) {
+    fun addField(name: String, dataType: String, options: List<DropdownOption>) {
         viewModelScope.launch {
             repository.createFieldDefinition(listId, name, dataType, options)
         }
     }
 
-    fun updateField(fieldId: String, name: String, dataType: String, options: List<String>) {
+    fun updateField(fieldId: String, name: String, dataType: String, options: List<DropdownOption>) {
         viewModelScope.launch {
             repository.updateFieldDefinition(fieldId, name, dataType, options)
         }

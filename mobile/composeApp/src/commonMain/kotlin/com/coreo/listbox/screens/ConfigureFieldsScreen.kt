@@ -36,6 +36,7 @@ import com.coreo.listbox.components.AddFieldBottomSheet
 import com.coreo.listbox.components.EditFieldBottomSheet
 import com.coreo.listbox.database.FieldDefinitionEntity
 import com.coreo.listbox.di.ServiceLocator
+import com.coreo.listbox.model.DropdownOption
 import com.coreo.listbox.viewmodel.ConfigureFieldsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,8 +66,8 @@ fun ConfigureFieldsScreen(
     }
 
     editingField?.let { field ->
-        val existingOptions = if (field.dataType == "DROPDOWN") {
-            (fieldOptions[field.id] ?: emptyList()).map { it.label }
+        val existingOptions: List<DropdownOption> = if (field.dataType == "DROPDOWN") {
+            (fieldOptions[field.id] ?: emptyList()).map { DropdownOption(it.label, it.color) }
         } else {
             emptyList()
         }

@@ -4,11 +4,13 @@ import app.cash.sqldelight.coroutines.asFlow
 import com.coreo.listbox.database.FieldDefinitionEntity
 import com.coreo.listbox.database.FieldOptionEntity
 import com.coreo.listbox.database.FieldValueEntity
+import com.coreo.listbox.database.GetItemsWithVisibleFieldValues
 import com.coreo.listbox.database.ListBoxDatabase
 import com.coreo.listbox.database.ItemEntity
 import com.coreo.listbox.database.ListEntity
 import com.coreo.listbox.util.getCurrentTimestampMillis
 import com.coreo.listbox.util.generateUUID
+import com.coreo.listbox.model.DropdownOption
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Inject
@@ -127,6 +129,16 @@ class ListBoxRepository(private val database: ListBoxDatabase) {
     }
 
     /**
+     * Get all (item, visible field definition, field value) rows for a list as a reactive Flow.
+     * Returns one row per (item × visible field definition) pair; fieldValue is null when not set.
+     */
+    fun getItemsWithVisibleFieldValues(listId: String): Flow<List<GetItemsWithVisibleFieldValues>> {
+        return database.itemEntityQueries.getItemsWithVisibleFieldValues(listId, listId)
+            .asFlow()
+            .map { it.executeAsList() }
+    }
+
+    /**
      * Get a specific item by ID as a reactive Flow
      */
     fun getItemById(itemId: String): Flow<ItemEntity?> {
@@ -178,7 +190,7 @@ class ListBoxRepository(private val database: ListBoxDatabase) {
         listId: String,
         name: String,
         dataType: String,
-        options: List<String> = emptyList()
+        options: List<DropdownOption> = emptyList()
     ) {
         val fieldId = generateUUID()
         val maxOrderIndex = database.fieldDefinitionEntityQueries
@@ -192,12 +204,13 @@ class ListBoxRepository(private val database: ListBoxDatabase) {
             dataType = dataType,
             orderIndex = maxOrderIndex + 1L
         )
-        options.forEachIndexed { index, label ->
+        options.forEachIndexed { index, option ->
             database.fieldOptionEntityQueries.insertFieldOption(
                 id = generateUUID(),
                 fieldDefinitionId = fieldId,
-                label = label,
-                orderIndex = index.toLong()
+                label = option.label,
+                orderIndex = index.toLong(),
+                color = option.color
             )
         }
     }
@@ -232,7 +245,7 @@ class ListBoxRepository(private val database: ListBoxDatabase) {
         fieldId: String,
         name: String,
         dataType: String,
-        options: List<String> = emptyList()
+        options: List<DropdownOption> = emptyList()
     ) {
         database.transaction {
             database.fieldDefinitionEntityQueries.updateFieldDefinition(
@@ -241,12 +254,13 @@ class ListBoxRepository(private val database: ListBoxDatabase) {
                 id = fieldId
             )
             database.fieldOptionEntityQueries.deleteFieldOptionsByDefinitionId(fieldId)
-            options.forEachIndexed { index, label ->
+            options.forEachIndexed { index, option ->
                 database.fieldOptionEntityQueries.insertFieldOption(
                     id = generateUUID(),
                     fieldDefinitionId = fieldId,
-                    label = label,
-                    orderIndex = index.toLong()
+                    label = option.label,
+                    orderIndex = index.toLong(),
+                    color = option.color
                 )
             }
         }

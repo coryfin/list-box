@@ -4,11 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.coreo.listbox.database.ItemEntity
 import com.coreo.listbox.database.ListEntity
+import com.coreo.listbox.model.FieldValueDisplay
 import com.coreo.listbox.repository.ListBoxRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
@@ -30,6 +32,24 @@ class ListDetailViewModel(
 
     val items: StateFlow<List<ItemEntity>> = repository.getItemsForList(listId)
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    val itemCustomFieldValues: StateFlow<Map<String, List<FieldValueDisplay>>> =
+        repository.getItemsWithVisibleFieldValues(listId)
+            .map { rows ->
+                rows
+                    .filter { it.fieldValue != null }
+                    .groupBy { it.itemId }
+                    .mapValues { (_, itemRows) ->
+                        itemRows.map { row ->
+                            FieldValueDisplay(
+                                fieldName = row.fieldName,
+                                value = row.fieldValue!!,
+                                optionColor = row.optionColor?.takeIf { it.isNotBlank() }
+                            )
+                        }
+                    }
+            }
+            .stateIn(viewModelScope, SharingStarted.Lazily, emptyMap())
 
     private val _listInteractionState = MutableStateFlow(ListInteractionState.Default)
     val listInteractionState: StateFlow<ListInteractionState> = _listInteractionState.asStateFlow()
