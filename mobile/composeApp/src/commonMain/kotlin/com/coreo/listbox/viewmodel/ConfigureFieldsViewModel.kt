@@ -57,4 +57,10 @@ class ConfigureFieldsViewModel(
             repository.updateFieldDefinition(fieldId, name, dataType, options)
         }
     }
+
+    fun deleteField(fieldId: String) {
+        viewModelScope.launch {
+            repository.deleteFieldDefinition(fieldId)
+        }
+    }
 }

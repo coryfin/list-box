@@ -1,6 +1,7 @@
 package com.coreo.listbox.screens
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -9,6 +10,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -24,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.coreo.listbox.components.AddFieldDialog
@@ -47,6 +51,7 @@ fun ConfigureFieldsScreen(
 
     var showAddFieldDialog by remember { mutableStateOf(false) }
     var editingField by remember { mutableStateOf<FieldDefinitionEntity?>(null) }
+    var deletingField by remember { mutableStateOf<FieldDefinitionEntity?>(null) }
 
     if (showAddFieldDialog) {
         AddFieldDialog(
@@ -70,6 +75,27 @@ fun ConfigureFieldsScreen(
             onDismiss = { editingField = null },
             onSave = { name, dataType, options ->
                 viewModel.updateField(field.id, name, dataType, options)
+            }
+        )
+    }
+
+    deletingField?.let { field ->
+        AlertDialog(
+            onDismissRequest = { deletingField = null },
+            title = { Text("Delete field?") },
+            text = { Text("\"${field.name}\" and all its values will be permanently deleted.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.deleteField(field.id)
+                    deletingField = null
+                }) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { deletingField = null }) {
+                    Text("Cancel")
+                }
             }
         )
     }
@@ -117,7 +143,8 @@ fun ConfigureFieldsScreen(
             items(fieldDefinitions, key = { it.id }) { field ->
                 FieldRow(
                     field = field,
-                    onTap = { editingField = field }
+                    onTap = { editingField = field },
+                    onDeleteClick = { deletingField = field }
                 )
             }
         }
@@ -127,24 +154,37 @@ fun ConfigureFieldsScreen(
 @Composable
 private fun FieldRow(
     field: FieldDefinitionEntity,
-    onTap: () -> Unit
+    onTap: () -> Unit,
+    onDeleteClick: () -> Unit
 ) {
-    TextButton(
-        onClick = onTap,
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 2.dp)
+            .padding(horizontal = 8.dp, vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Text(
-                text = field.name,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = field.dataType.lowercase().replaceFirstChar { it.uppercase() },
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+        TextButton(
+            onClick = onTap,
+            modifier = Modifier.weight(1f)
+        ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = field.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = field.dataType.lowercase().replaceFirstChar { it.uppercase() },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+        IconButton(onClick = onDeleteClick) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Delete field",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
