@@ -38,6 +38,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
+import com.coreo.listbox.model.DropdownOption
+import com.coreo.listbox.ui.theme.pickColorForNewOption
 
 private val EDIT_DATA_TYPES = listOf("Text", "Dropdown")
 
@@ -46,18 +48,19 @@ private val EDIT_DATA_TYPES = listOf("Text", "Dropdown")
 fun EditFieldBottomSheet(
     initialName: String,
     initialDataType: String,
-    initialOptions: List<String>,
+    initialOptions: List<DropdownOption>,
     onDismiss: () -> Unit,
-    onSave: (name: String, dataType: String, options: List<String>) -> Unit
+    onSave: (name: String, dataType: String, options: List<DropdownOption>) -> Unit
 ) {
     var fieldLabel by remember { mutableStateOf(initialName) }
     val initialDisplayType = if (initialDataType == "DROPDOWN") "Dropdown" else "Text"
     var selectedDataType by remember { mutableStateOf(initialDisplayType) }
     var typeMenuExpanded by remember { mutableStateOf(false) }
     val options = remember {
-        mutableStateListOf<String>().also { list ->
+        mutableStateListOf<DropdownOption>().also { list ->
             if (initialOptions.isEmpty() && initialDisplayType == "Dropdown") {
-                list.add("")
+                val color = pickColorForNewOption(emptyList())
+                list.add(DropdownOption("", color))
             } else {
                 list.addAll(initialOptions)
             }
@@ -68,10 +71,11 @@ fun EditFieldBottomSheet(
             repeat(options.size.coerceAtLeast(1)) { list.add(FocusRequester()) }
         }
     }
+    val colorPickerOpenIndex = remember { mutableStateOf<Int?>(null) }
 
     val isDropdown = selectedDataType == "Dropdown"
     val isSaveEnabled = fieldLabel.trim().isNotEmpty() &&
-        (!isDropdown || options.any { it.trim().isNotEmpty() })
+        (!isDropdown || options.any { it.label.trim().isNotEmpty() })
 
     LaunchedEffect(options.size) {
         if (isDropdown && options.size > 0) {
@@ -133,7 +137,8 @@ fun EditFieldBottomSheet(
                                 selectedDataType = type
                                 typeMenuExpanded = false
                                 if (type == "Dropdown" && options.isEmpty()) {
-                                    options.add("")
+                                    val color = pickColorForNewOption(emptyList())
+                                    options.add(DropdownOption("", color))
                                     focusRequesters.add(FocusRequester())
                                 }
                             }
@@ -153,17 +158,30 @@ fun EditFieldBottomSheet(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.fillMaxWidth()
                     ) {
+                        OptionColorSwatch(
+                            tokenName = option.color,
+                            expanded = colorPickerOpenIndex.value == index,
+                            onToggle = {
+                                colorPickerOpenIndex.value =
+                                    if (colorPickerOpenIndex.value == index) null else index
+                            },
+                            onColorSelected = { newColor ->
+                                options[index] = options[index].copy(color = newColor)
+                                colorPickerOpenIndex.value = null
+                            }
+                        )
                         OutlinedTextField(
-                            value = option,
-                            onValueChange = { options[index] = it },
+                            value = option.label,
+                            onValueChange = { options[index] = options[index].copy(label = it) },
                             modifier = Modifier
                                 .weight(1f)
-                                .focusRequester(focusRequesters[index]),
+                                .padding(start = 8.dp)
+                                .focusRequester(focusRequesters.getOrElse(index) { FocusRequester() }),
                             singleLine = true
                         )
                         IconButton(onClick = {
                             options.removeAt(index)
-                            focusRequesters.removeAt(index)
+                            if (index < focusRequesters.size) focusRequesters.removeAt(index)
                         }) {
                             Icon(
                                 imageVector = Icons.Default.Close,
@@ -175,7 +193,9 @@ fun EditFieldBottomSheet(
                 }
                 TextButton(
                     onClick = {
-                        options.add("")
+                        val existingColors = options.map { it.color }
+                        val color = pickColorForNewOption(existingColors)
+                        options.add(DropdownOption("", color))
                         focusRequesters.add(FocusRequester())
                     },
                     modifier = Modifier.padding(start = 0.dp)
@@ -201,7 +221,7 @@ fun EditFieldBottomSheet(
                         onSave(
                             fieldLabel.trim(),
                             selectedDataType.uppercase(),
-                            if (isDropdown) options.filter { it.trim().isNotEmpty() } else emptyList()
+                            if (isDropdown) options.filter { it.label.trim().isNotEmpty() } else emptyList()
                         )
                         onDismiss()
                     },
@@ -214,4 +234,5 @@ fun EditFieldBottomSheet(
         }
     }
 }
+
 

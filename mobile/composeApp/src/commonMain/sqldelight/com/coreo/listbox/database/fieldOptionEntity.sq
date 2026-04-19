@@ -3,6 +3,7 @@ CREATE TABLE fieldOptionEntity (
     fieldDefinitionId TEXT NOT NULL,
     label TEXT NOT NULL,
     orderIndex INTEGER NOT NULL,
+    color TEXT NOT NULL DEFAULT '',
     FOREIGN KEY(fieldDefinitionId) REFERENCES fieldDefinitionEntity(id) ON DELETE CASCADE
 );
 
@@ -10,11 +11,11 @@ CREATE INDEX idx_field_option_def ON fieldOptionEntity(fieldDefinitionId, orderI
 
 -- Queries
 insertFieldOption:
-INSERT INTO fieldOptionEntity(id, fieldDefinitionId, label, orderIndex)
-VALUES (?, ?, ?, ?);
+INSERT INTO fieldOptionEntity(id, fieldDefinitionId, label, orderIndex, color)
+VALUES (?, ?, ?, ?, ?);
 
 getFieldOptionsByDefinitionId:
-SELECT id, fieldDefinitionId, label, orderIndex FROM fieldOptionEntity
+SELECT id, fieldDefinitionId, label, orderIndex, color FROM fieldOptionEntity
 WHERE fieldDefinitionId = ?
 ORDER BY orderIndex;
 

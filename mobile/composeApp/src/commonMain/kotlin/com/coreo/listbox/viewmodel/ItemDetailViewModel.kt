@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.coreo.listbox.database.FieldDefinitionEntity
 import com.coreo.listbox.database.FieldOptionEntity
 import com.coreo.listbox.database.ItemEntity
+import com.coreo.listbox.model.DropdownOption
 import com.coreo.listbox.repository.ListBoxRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -103,7 +104,7 @@ class ItemDetailViewModel(
         }
     }
 
-    fun addFieldDefinition(name: String, dataType: String, options: List<String> = emptyList()) {
+    fun addFieldDefinition(name: String, dataType: String, options: List<DropdownOption> = emptyList()) {
         val listId = item.value?.listId ?: return
         viewModelScope.launch {
             repository.createFieldDefinition(listId, name, dataType, options)
