@@ -61,6 +61,11 @@ actual fun ListBoxNavHost() {
                     animatedContentScope = this,
                     listId = listId,
                     onItemNavigate = { itemId -> navController.navigate(Routes.itemDetail(itemId)) },
+                    onListCopied = { newListId ->
+                        navController.navigate(Routes.listDetail(newListId)) {
+                            popUpTo(Routes.LIST_DETAIL) { inclusive = true }
+                        }
+                    },
                     onConfigureFieldsClick = { navController.navigate(Routes.configureFields(listId)) },
                     onBackClick = { navController.navigateUp() }
                 )

@@ -74,6 +74,90 @@ class ListBoxRepository(private val database: ListBoxDatabase) {
     suspend fun deleteList(listId: String) {
         database.listEntityQueries.deleteList(id = listId)
     }
+
+    /**
+     * Deep-copy a list with a new title. Copies items, field definitions, field options,
+     * and field values in a single transaction. Returns the new list's ID.
+     */
+    fun copyList(sourceListId: String, newTitle: String): String {
+        val newListId = generateUUID()
+        val now = getCurrentTimestampMillis()
+
+        val sourceItems = database.itemEntityQueries
+            .getItemsByListId(sourceListId).executeAsList()
+        val sourceFieldDefs = database.fieldDefinitionEntityQueries
+            .getFieldDefinitionsByListId(sourceListId).executeAsList()
+
+        // oldItemId -> newItemId
+        val itemIdMap = sourceItems.associate { it.id to generateUUID() }
+        // oldFieldDefId -> newFieldDefId
+        val fieldDefIdMap = sourceFieldDefs.associate { it.id to generateUUID() }
+
+        database.transaction {
+            database.listEntityQueries.insertList(
+                id = newListId,
+                title = newTitle,
+                createdAt = now,
+                updatedAt = now
+            )
+
+            for (item in sourceItems) {
+                database.itemEntityQueries.insertItem(
+                    id = itemIdMap.getValue(item.id),
+                    listId = newListId,
+                    title = item.title,
+                    description = item.description,
+                    orderIndex = item.orderIndex
+                )
+            }
+
+            for (fieldDef in sourceFieldDefs) {
+                val newFieldDefId = fieldDefIdMap.getValue(fieldDef.id)
+                database.fieldDefinitionEntityQueries.insertFieldDefinition(
+                    id = newFieldDefId,
+                    listId = newListId,
+                    name = fieldDef.name,
+                    dataType = fieldDef.dataType,
+                    orderIndex = fieldDef.orderIndex
+                )
+                if (fieldDef.visible == 1L) {
+                    database.fieldDefinitionEntityQueries.updateFieldVisibility(
+                        visible = 1L,
+                        id = newFieldDefId
+                    )
+                }
+
+                val options = database.fieldOptionEntityQueries
+                    .getFieldOptionsByDefinitionId(fieldDef.id).executeAsList()
+                for (option in options) {
+                    database.fieldOptionEntityQueries.insertFieldOption(
+                        id = generateUUID(),
+                        fieldDefinitionId = newFieldDefId,
+                        label = option.label,
+                        orderIndex = option.orderIndex,
+                        color = option.color
+                    )
+                }
+            }
+
+            for (item in sourceItems) {
+                val fieldValues = database.fieldValueEntityQueries
+                    .getFieldValuesByItemId(item.id).executeAsList()
+                for (fv in fieldValues) {
+                    val newItemId = itemIdMap.getValue(item.id)
+                    val newFieldDefId = fieldDefIdMap[fv.fieldDefinitionId] ?: continue
+                    database.fieldValueEntityQueries.upsertFieldValue(
+                        id = generateUUID(),
+                        itemId = newItemId,
+                        fieldDefinitionId = newFieldDefId,
+                        value_ = fv.value_
+                    )
+                }
+            }
+        }
+
+        return newListId
+    }
     
     /**
      * Create a new item with an auto-generated UUID, appended to the end of the list

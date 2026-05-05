@@ -150,4 +150,11 @@ class ListDetailViewModel(
             repository.updateListTitle(listId, newTitle)
         }
     }
+
+    fun copyList(newTitle: String, onCopied: (String) -> Unit) {
+        viewModelScope.launch {
+            val newListId = repository.copyList(listId, newTitle)
+            onCopied(newListId)
+        }
+    }
 }

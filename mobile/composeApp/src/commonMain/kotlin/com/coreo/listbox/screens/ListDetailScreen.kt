@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.isSystemInDarkTheme
 import com.coreo.listbox.components.AddItemBottomSheet
+import com.coreo.listbox.components.CopyListDialog
 import org.jetbrains.compose.resources.painterResource
 import listbox.composeapp.generated.resources.Res
 import com.coreo.listbox.components.DeleteItemsDialog
@@ -74,6 +75,7 @@ fun ListDetailScreen(
     listId: String,
     onItemNavigate: (String) -> Unit,
     onBackClick: () -> Unit,
+    onListCopied: (String) -> Unit = {},
     onConfigureFieldsClick: () -> Unit = {},
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedContentScope: AnimatedContentScope? = null
@@ -86,6 +88,7 @@ fun ListDetailScreen(
     var showDeleteListDialog by remember { mutableStateOf(false) }
     var showDeleteItemsDialog by remember { mutableStateOf(false) }
     var showRenameListDialog by remember { mutableStateOf(false) }
+    var showCopyListDialog by remember { mutableStateOf(false) }
     var showAddItemSheet by remember { mutableStateOf(false) }
 
     val listInteractionState by viewModel.listInteractionState.collectAsState()
@@ -103,6 +106,14 @@ fun ListDetailScreen(
             currentTitle = listTitle,
             onDismiss = { showRenameListDialog = false },
             onRename = { newTitle -> viewModel.updateListTitle(newTitle) }
+        )
+    }
+
+    if (showCopyListDialog) {
+        CopyListDialog(
+            currentTitle = listTitle,
+            onDismiss = { showCopyListDialog = false },
+            onCopy = { newTitle -> viewModel.copyList(newTitle, onCopied = onListCopied) }
         )
     }
 
@@ -218,6 +229,13 @@ fun ListDetailScreen(
                                     onClick = {
                                         showOverflowMenu = false
                                         showRenameListDialog = true
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Make a copy") },
+                                    onClick = {
+                                        showOverflowMenu = false
+                                        showCopyListDialog = true
                                     }
                                 )
                                 DropdownMenuItem(
