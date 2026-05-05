@@ -2,24 +2,33 @@ CREATE TABLE listEntity (
     id TEXT PRIMARY KEY NOT NULL,
     title TEXT NOT NULL,
     createdAt INTEGER NOT NULL,
-    updatedAt INTEGER NOT NULL
+    updatedAt INTEGER NOT NULL,
+    orderIndex INTEGER NOT NULL DEFAULT 0
 );
 
--- Index for sorting lists by creation date
-CREATE INDEX idx_list_created_at ON listEntity(createdAt DESC);
+-- Index for sorting lists by custom order
+CREATE INDEX idx_list_order ON listEntity(orderIndex ASC);
 
 -- Queries
 insertList:
-INSERT INTO listEntity(id, title, createdAt, updatedAt)
-VALUES (?, ?, ?, ?);
+INSERT INTO listEntity(id, title, createdAt, updatedAt, orderIndex)
+VALUES (?, ?, ?, ?, ?);
 
 getAllLists:
-SELECT id, title, createdAt, updatedAt FROM listEntity
-ORDER BY createdAt DESC;
+SELECT id, title, createdAt, updatedAt, orderIndex FROM listEntity
+ORDER BY orderIndex ASC;
+
+getMaxListOrderIndex:
+SELECT MAX(orderIndex) FROM listEntity;
 
 updateListTitle:
 UPDATE listEntity
 SET title = ?, updatedAt = ?
+WHERE id = ?;
+
+updateListOrderIndex:
+UPDATE listEntity
+SET orderIndex = ?
 WHERE id = ?;
 
 deleteList:
@@ -27,5 +36,5 @@ DELETE FROM listEntity
 WHERE id = ?;
 
 getListById:
-SELECT id, title, createdAt, updatedAt FROM listEntity
+SELECT id, title, createdAt, updatedAt, orderIndex FROM listEntity
 WHERE id = ?;

@@ -42,17 +42,23 @@ class ListBoxRepository(private val database: ListBoxDatabase) {
     suspend fun createList(title: String): ListEntity {
         val id = generateUUID()
         val now = getCurrentTimestampMillis()
+        val maxOrderIndex = database.listEntityQueries.getMaxListOrderIndex()
+            .executeAsOneOrNull()
+            ?.MAX ?: 0L
+        val newOrderIndex = maxOrderIndex + 1L
         database.listEntityQueries.insertList(
             id = id,
             title = title,
             createdAt = now,
-            updatedAt = now
+            updatedAt = now,
+            orderIndex = newOrderIndex
         )
         return ListEntity(
             id = id,
             title = title,
             createdAt = now,
-            updatedAt = now
+            updatedAt = now,
+            orderIndex = newOrderIndex
         )
     }
     
@@ -94,11 +100,15 @@ class ListBoxRepository(private val database: ListBoxDatabase) {
         val fieldDefIdMap = sourceFieldDefs.associate { it.id to generateUUID() }
 
         database.transaction {
+            val maxOrderIndex = database.listEntityQueries.getMaxListOrderIndex()
+                .executeAsOneOrNull()
+                ?.MAX ?: 0L
             database.listEntityQueries.insertList(
                 id = newListId,
                 title = newTitle,
                 createdAt = now,
-                updatedAt = now
+                updatedAt = now,
+                orderIndex = maxOrderIndex + 1L
             )
 
             for (item in sourceItems) {
@@ -198,6 +208,21 @@ class ListBoxRepository(private val database: ListBoxDatabase) {
                 database.itemEntityQueries.updateItemOrderIndex(
                     orderIndex = newOrderIndex,
                     id = itemId
+                )
+            }
+        }
+    }
+
+    /**
+     * Batch update orderIndex for multiple lists in a single transaction
+     */
+    suspend fun reorderLists(orderUpdates: List<Pair<String, Long>>) {
+        if (orderUpdates.isEmpty()) return
+        database.transaction {
+            orderUpdates.forEach { (listId, newOrderIndex) ->
+                database.listEntityQueries.updateListOrderIndex(
+                    orderIndex = newOrderIndex,
+                    id = listId
                 )
             }
         }

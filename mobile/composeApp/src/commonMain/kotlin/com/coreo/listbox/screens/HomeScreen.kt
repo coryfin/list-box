@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -46,6 +46,9 @@ import org.jetbrains.compose.resources.painterResource
 import listbox.composeapp.generated.resources.Res
 import listbox.composeapp.generated.resources.empty_box
 import listbox.composeapp.generated.resources.listbox_banner_logo
+import sh.calvin.reorderable.ReorderableCollectionItemScope
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
@@ -57,10 +60,15 @@ fun HomeScreen(
 ) {
     val repository = remember { ServiceLocator.getRepository() }
     val viewModel = remember { HomeViewModel(repository) }
-    val listEntities by viewModel.lists.collectAsState()
+    val orderedLists by viewModel.orderedLists.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     var showCreateDialog by remember { mutableStateOf(false) }
-    val isPopulated = listEntities.isNotEmpty()
+    val isPopulated = orderedLists.isNotEmpty()
+
+    val lazyListState = rememberLazyListState()
+    val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
+        viewModel.onListMoved(from.index, to.index)
+    }
     
     if (showCreateDialog) {
         CreateListDialog(
@@ -102,7 +110,7 @@ fun HomeScreen(
             }
         }
     ) { paddingValues ->
-        if (listEntities.isEmpty()) {
+        if (orderedLists.isEmpty()) {
             EmptyListState(
                 onCreateBlankList = { title ->
                     val newList = viewModel.createListAndGetId(title)
@@ -117,19 +125,27 @@ fun HomeScreen(
             )
         } else {
             LazyColumn(
+                state = lazyListState,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(listEntities) { list ->
-                    ListCard(
-                        list = list,
-                        onClick = { onListSelect(list.id) },
-                        sharedTransitionScope = sharedTransitionScope,
-                        animatedContentScope = animatedContentScope
-                    )
+                items(orderedLists, key = { it.id }) { list ->
+                    ReorderableItem(
+                        state = reorderableLazyListState,
+                        key = list.id
+                    ) {
+                        ListCard(
+                            list = list,
+                            onClick = { onListSelect(list.id) },
+                            onDragEnd = { viewModel.onDragEnded() },
+                            reorderScope = this,
+                            sharedTransitionScope = sharedTransitionScope,
+                            animatedContentScope = animatedContentScope
+                        )
+                    }
                 }
             }
         }
@@ -244,9 +260,13 @@ private fun TemplateButton(
 private fun ListCard(
     list: ListEntity,
     onClick: () -> Unit,
+    onDragEnd: () -> Unit,
+    reorderScope: ReorderableCollectionItemScope,
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedContentScope: AnimatedContentScope? = null
 ) {
+    var longPressConsumed by remember { mutableStateOf(false) }
+
     val sharedModifier = if (sharedTransitionScope != null && animatedContentScope != null) {
         with(sharedTransitionScope) {
             Modifier.sharedBounds(
@@ -257,9 +277,21 @@ private fun ListCard(
         }
     } else Modifier
     Card(
-        modifier = sharedModifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
+        onClick = {
+            if (longPressConsumed) {
+                longPressConsumed = false
+            } else {
+                onClick()
+            }
+        },
+        modifier = with(reorderScope) {
+            sharedModifier
+                .longPressDraggableHandle(
+                    onDragStarted = { longPressConsumed = true },
+                    onDragStopped = onDragEnd
+                )
+                .fillMaxWidth()
+        }
     ) {
         Row(
             modifier = Modifier
