@@ -397,6 +397,101 @@ class ListBoxRepository(private val database: ListBoxDatabase) {
     }
 
     /**
+     * Move a collection of items to a destination list.
+     *
+     * For each [sourceFieldDefIdsToCreate], a new field definition (with its options) is created
+     * in the destination list. Field values for all moved items are carried over using:
+     *   - Newly created field defs (from [sourceFieldDefIdsToCreate])
+     *   - Existing destination field defs whose label matches a source field def label (auto-carry)
+     *
+     * All operations run in a single transaction.
+     */
+    suspend fun moveItems(
+        itemIds: Collection<String>,
+        destinationListId: String,
+        sourceFieldDefIdsToCreate: List<String>
+    ) {
+        if (itemIds.isEmpty()) return
+
+        val sourceFieldDefs = sourceFieldDefIdsToCreate.mapNotNull { id ->
+            database.fieldDefinitionEntityQueries.getFieldDefinitionById(id).executeAsOneOrNull()
+        }
+        val destFieldDefs = database.fieldDefinitionEntityQueries
+            .getFieldDefinitionsByListId(destinationListId).executeAsList()
+        val destFieldDefsByLabel = destFieldDefs.associateBy { it.name }
+
+        database.transaction {
+            // Build source→dest field def ID mapping for newly created fields
+            val sourceToDestFieldDefId = mutableMapOf<String, String>()
+
+            for (fieldDef in sourceFieldDefs) {
+                val newFieldDefId = generateUUID()
+                val maxOrderIndex = database.fieldDefinitionEntityQueries
+                    .getMaxFieldOrderIndex(destinationListId).executeAsOneOrNull()?.MAX ?: 0L
+                database.fieldDefinitionEntityQueries.insertFieldDefinition(
+                    id = newFieldDefId,
+                    listId = destinationListId,
+                    name = fieldDef.name,
+                    dataType = fieldDef.dataType,
+                    orderIndex = maxOrderIndex + 1L
+                )
+                val options = database.fieldOptionEntityQueries
+                    .getFieldOptionsByDefinitionId(fieldDef.id).executeAsList()
+                for (option in options) {
+                    database.fieldOptionEntityQueries.insertFieldOption(
+                        id = generateUUID(),
+                        fieldDefinitionId = newFieldDefId,
+                        label = option.label,
+                        orderIndex = option.orderIndex,
+                        color = option.color
+                    )
+                }
+                sourceToDestFieldDefId[fieldDef.id] = newFieldDefId
+            }
+
+            // Add auto-carry mappings: source fields whose label matches an existing dest field
+            val allSourceFieldDefs = database.fieldDefinitionEntityQueries
+                .getFieldDefinitionsByListId(
+                    // Derive sourceListId from any of the items being moved
+                    database.itemEntityQueries.getItemById(itemIds.first())
+                        .executeAsOneOrNull()?.listId ?: return@transaction
+                ).executeAsList()
+            for (srcDef in allSourceFieldDefs) {
+                if (!sourceToDestFieldDefId.containsKey(srcDef.id)) {
+                    val matchingDestDef = destFieldDefsByLabel[srcDef.name]
+                    if (matchingDestDef != null) {
+                        sourceToDestFieldDefId[srcDef.id] = matchingDestDef.id
+                    }
+                }
+            }
+
+            // Move each item
+            for (itemId in itemIds) {
+                val maxOrderIndex = database.itemEntityQueries
+                    .getMaxOrderIndex(destinationListId).executeAsOneOrNull()?.MAX ?: 0L
+                database.itemEntityQueries.moveItemToList(
+                    listId = destinationListId,
+                    orderIndex = maxOrderIndex + 1L,
+                    id = itemId
+                )
+
+                // Carry over field values
+                val fieldValues = database.fieldValueEntityQueries
+                    .getFieldValuesByItemId(itemId).executeAsList()
+                for (fv in fieldValues) {
+                    val destFieldDefId = sourceToDestFieldDefId[fv.fieldDefinitionId] ?: continue
+                    database.fieldValueEntityQueries.upsertFieldValue(
+                        id = generateUUID(),
+                        itemId = itemId,
+                        fieldDefinitionId = destFieldDefId,
+                        value_ = fv.value_
+                    )
+                }
+            }
+        }
+    }
+
+    /**
      * Upsert a field value for a specific item + field definition pair
      */
     suspend fun upsertFieldValue(itemId: String, fieldDefinitionId: String, value: String) {

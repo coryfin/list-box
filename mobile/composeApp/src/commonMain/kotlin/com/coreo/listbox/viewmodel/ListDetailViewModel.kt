@@ -2,10 +2,12 @@ package com.coreo.listbox.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.coreo.listbox.database.FieldDefinitionEntity
 import com.coreo.listbox.database.ItemEntity
 import com.coreo.listbox.database.ListEntity
 import com.coreo.listbox.model.FieldValueDisplay
 import com.coreo.listbox.repository.ListBoxRepository
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -31,6 +33,14 @@ class ListDetailViewModel(
         .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
     val items: StateFlow<List<ItemEntity>> = repository.getItemsForList(listId)
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    val sourceFieldDefinitions: StateFlow<List<FieldDefinitionEntity>> =
+        repository.getFieldDefinitionsForList(listId)
+            .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    val allOtherLists: StateFlow<List<ListEntity>> = repository.getAllLists()
+        .map { lists -> lists.filter { it.id != listId } }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     val itemCustomFieldValues: StateFlow<Map<String, List<FieldValueDisplay>>> =
@@ -132,6 +142,16 @@ class ListDetailViewModel(
             exitMultiSelect()
         }
     }
+
+    fun moveSelectedItems(destinationListId: String, sourceFieldDefIdsToCreate: List<String>) {
+        val toMove = _selectedItemIds.value
+        viewModelScope.launch {
+            repository.moveItems(toMove, destinationListId, sourceFieldDefIdsToCreate)
+            exitMultiSelect()
+        }
+    }
+
+    fun getFieldDefsForList(listId: String) = repository.getFieldDefinitionsForList(listId)
 
     fun createItem(title: String, description: String? = null) {
         viewModelScope.launch {

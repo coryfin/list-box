@@ -50,6 +50,11 @@ getMaxOrderIndex:
 SELECT MAX(orderIndex) FROM itemEntity
 WHERE listId = ?;
 
+moveItemToList:
+UPDATE itemEntity
+SET listId = ?, orderIndex = ?
+WHERE id = ?;
+
 getItemsWithVisibleFieldValues:
 SELECT
     i.id AS itemId,

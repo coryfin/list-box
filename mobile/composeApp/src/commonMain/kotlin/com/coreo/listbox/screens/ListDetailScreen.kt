@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.DriveFileMove
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
@@ -35,9 +36,14 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -53,6 +59,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.isSystemInDarkTheme
 import com.coreo.listbox.components.AddItemBottomSheet
 import com.coreo.listbox.components.CopyListDialog
+import com.coreo.listbox.components.MoveItemsDialog
 import org.jetbrains.compose.resources.painterResource
 import listbox.composeapp.generated.resources.Res
 import com.coreo.listbox.components.DeleteItemsDialog
@@ -64,6 +71,7 @@ import com.coreo.listbox.ui.theme.optionColorEntryFor
 import com.coreo.listbox.di.ServiceLocator
 import com.coreo.listbox.viewmodel.ListDetailViewModel
 import com.coreo.listbox.viewmodel.ListInteractionState
+import kotlinx.coroutines.flow.flowOf
 import listbox.composeapp.generated.resources.empty_state
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import sh.calvin.reorderable.ReorderableItem
@@ -90,11 +98,19 @@ fun ListDetailScreen(
     var showRenameListDialog by remember { mutableStateOf(false) }
     var showCopyListDialog by remember { mutableStateOf(false) }
     var showAddItemSheet by remember { mutableStateOf(false) }
+    var showMoveItemsDialog by remember { mutableStateOf(false) }
+    var moveDestinationListId by remember { mutableStateOf<String?>(null) }
 
     val listInteractionState by viewModel.listInteractionState.collectAsState()
     val selectedItemIds by viewModel.selectedItemIds.collectAsState()
     val orderedItems by viewModel.orderedItems.collectAsState()
     val itemCustomFieldValues by viewModel.itemCustomFieldValues.collectAsState()
+    val allOtherLists by viewModel.allOtherLists.collectAsState()
+    val sourceFieldDefinitions by viewModel.sourceFieldDefinitions.collectAsState()
+
+    val destinationFieldDefinitions by remember(moveDestinationListId) {
+        moveDestinationListId?.let { viewModel.getFieldDefsForList(it) } ?: flowOf(emptyList())
+    }.collectAsState(emptyList())
 
     val lazyListState = rememberLazyListState()
     val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
@@ -137,6 +153,24 @@ fun ListDetailScreen(
                 onBackClick()
             },
             onDismiss = { showDeleteListDialog = false }
+        )
+    }
+
+    if (showMoveItemsDialog) {
+        MoveItemsDialog(
+            itemCount = selectedItemIds.size,
+            availableLists = allOtherLists,
+            sourceFieldDefinitions = sourceFieldDefinitions,
+            selectedDestinationListId = moveDestinationListId,
+            destinationFieldDefinitions = destinationFieldDefinitions,
+            onDestinationSelected = { moveDestinationListId = it },
+            onDismiss = {
+                showMoveItemsDialog = false
+                moveDestinationListId = null
+            },
+            onMove = { destinationListId, fieldDefIds ->
+                viewModel.moveSelectedItems(destinationListId, fieldDefIds)
+            }
         )
     }
 
@@ -189,6 +223,18 @@ fun ListDetailScreen(
                             }
                         },
                         actions = {
+                            TooltipBox(
+                                positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+                                tooltip = { PlainTooltip { Text("Move items") } },
+                                state = rememberTooltipState()
+                            ) {
+                                IconButton(onClick = { showMoveItemsDialog = true }) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.DriveFileMove,
+                                        contentDescription = "Move items"
+                                    )
+                                }
+                            }
                             IconButton(onClick = { showDeleteItemsDialog = true }) {
                                 Icon(
                                     imageVector = Icons.Default.Delete,
